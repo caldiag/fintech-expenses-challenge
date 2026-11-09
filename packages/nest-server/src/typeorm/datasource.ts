@@ -1,4 +1,12 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { loadEnvFile } from 'node:process';
 import { DataSource } from 'typeorm';
+
+const envPath = resolve(import.meta.dirname, '../../.env');
+if (existsSync(envPath)) {
+  loadEnvFile(envPath);
+}
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
