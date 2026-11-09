@@ -38,6 +38,7 @@
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
     "@nestjs/config": "^12.1.1",
+    "@nestjs/jwt": "^12.0.4",
     "@nestjs/mau": "^0.2.6",
     "@nestjs/schematics": "^12.0.0",
     "@nestjs/testing": "^12.0.1",
