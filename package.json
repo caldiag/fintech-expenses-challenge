@@ -5,7 +5,8 @@
     "dev": "concurrently -k -n react,nest \"pnpm --filter @app/react-client dev\" \"pnpm --filter @app/nest-server start:dev\"",
     "build": "pnpm -r --sort build",
     "start": "pnpm --filter @app/nest-server start:prod",
-    "gen-migrations": "pnpm --filter @app/nest-server run gen-migrations"
+    "gen-migrations": "pnpm --filter @app/nest-server run gen-migrations",
+    "reset-db": "pnpm --filter @app/nest-server run reset-db"
   },
   "devDependencies": {
     "concurrently": "^10.0.7"
