@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
+import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
 import { RoleEntity } from '../../role/entities/role.entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 
@@ -17,7 +18,7 @@ import { UserEntity } from '../../user/entities/user.entity.ts';
   'CHK_permission_set_exactly_one_owner',
   '("roleId" IS NOT NULL) <> ("userId" IS NOT NULL)',
 )
-export class PermissionSetEntity {
+export class PermissionSetEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

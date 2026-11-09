@@ -7,11 +7,12 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
+import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 import { ContactEntity } from '../../contact/entities/contact.entity.ts';
 
 @Entity()
-export class CompanyEntity {
+export class CompanyEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

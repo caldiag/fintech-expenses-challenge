@@ -6,11 +6,12 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
+import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 import { TransactionEntity } from '../../transaction/entities/transaction.entity.ts';
 
 @Entity()
-export class CategoryEntity {
+export class CategoryEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
