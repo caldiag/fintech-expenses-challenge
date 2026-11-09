@@ -13,6 +13,7 @@ import { RoleModule } from './role/role.module.ts';
 import { PermissionsModule } from './permissions/permissions.module.ts';
 import { ConfigModule } from '@nestjs/config';
 import { AppDataSource } from './typeorm/datasource.ts';
+import { ContactModule } from './contact/contact.module.js';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AppDataSource } from './typeorm/datasource.ts';
     TransactionModule,
     DashboardModule,
     UserModule,
+    ContactModule,
     CompanyModule,
     RoleModule,
     DatabaseModule,

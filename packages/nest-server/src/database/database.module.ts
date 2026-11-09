@@ -5,6 +5,8 @@ import { UserEntity } from '../user/entities/user.entity.ts';
 import { CategoryEntity } from '../category/entities/category.entity.ts';
 import { PermissionSetEntity } from '../permissions/entities/permission-set.entity.ts';
 import { RoleEntity } from '../role/entities/role.entity.ts';
+import { ContactEntity } from '../contact/entities/contact.entity.ts';
+import { CompanyEntity } from '../company/entities/company.entity.ts';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { RoleEntity } from '../role/entities/role.entity.ts';
       CategoryEntity,
       PermissionSetEntity,
       RoleEntity,
+      ContactEntity,
+      CompanyEntity,
     ]),
   ],
 })
