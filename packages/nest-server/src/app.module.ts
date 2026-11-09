@@ -1,36 +1,38 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
-import { AuthModule } from './auth/auth.module.js';
-import { CategoryModule } from './category/category.module.js';
-import { TransactionModule } from './transaction/transaction.module.js';
-import { DashboardModule } from './dashboard/dashboard.module.js';
-import { UserModule } from './user/user.module.js';
+import { AppController } from './app.controller.ts';
+import { AppService } from './app.service.ts';
+import { AuthModule } from './auth/auth.module.ts';
+import { CategoryModule } from './category/category.module.ts';
+import { TransactionModule } from './transaction/transaction.module.ts';
+import { DashboardModule } from './dashboard/dashboard.module.ts';
+import { UserModule } from './user/user.module.ts';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from './config/config.module.js';
-import { CompanyModule } from './company/company.module.js';
-import { DatabaseModule } from './database/database.module.js';
-import { RoleModule } from './role/role.module.js';
-import { PermissionsModule } from './permissions/permissions.module.js';
+import { CompanyModule } from './company/company.module.ts';
+import { DatabaseModule } from './database/database.module.ts';
+import { RoleModule } from './role/role.module.ts';
+import { PermissionsModule } from './permissions/permissions.module.ts';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'test',
+      host: process.env.DATABASE_HOST,
+      port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+      database: process.env.DATABASE_NAME,
+      username: process.env.DATABASE_USERNAME,
+      password: process.env.DATABASE_PASSWORD,
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: (process.env.NODE_ENV || '').toLowerCase() !== 'production',
     }),
     AuthModule,
     CategoryModule,
     TransactionModule,
     DashboardModule,
     UserModule,
-    ConfigModule,
     CompanyModule,
     RoleModule,
     DatabaseModule,
