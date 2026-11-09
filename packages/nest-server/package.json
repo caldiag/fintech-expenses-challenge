@@ -10,6 +10,7 @@
     "dev": "pnpm run start:dev",
     "build": "pnpm --filter @app/types build && nest build",
     "deploy": "nest deploy",
+    "gen-migrations": "sh -c 'if [ -z \"$1\" ]; then printf \"%s\\n\" \"Usage: pnpm gen-migrations <name>\" >&2; exit 1; fi; pnpm typeorm migration:generate -d src/typeorm/datasource.ts \"./src/typeorm/migrations/$(date +%s)-$1.ts\"' --",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "pnpm --filter @app/types build && nest start",
     "start:dev": "pnpm --filter @app/types build && nest start --watch",

@@ -12,22 +12,14 @@ import { DatabaseModule } from './database/database.module.ts';
 import { RoleModule } from './role/role.module.ts';
 import { PermissionsModule } from './permissions/permissions.module.ts';
 import { ConfigModule } from '@nestjs/config';
+import { AppDataSource } from './typeorm/datasource.ts';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST,
-      port: parseInt(process.env.DATABASE_PORT || '5432', 10),
-      database: process.env.DATABASE_NAME,
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      autoLoadEntities: true,
-      synchronize: (process.env.NODE_ENV || '').toLowerCase() !== 'production',
-    }),
+    TypeOrmModule.forRoot(AppDataSource.options),
     AuthModule,
     CategoryModule,
     TransactionModule,
