@@ -8,7 +8,6 @@ import { DashboardModule } from './dashboard/dashboard.module.ts';
 import { UserModule } from './user/user.module.ts';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CompanyModule } from './company/company.module.ts';
-import { DatabaseModule } from './database/database.module.ts';
 import { RoleModule } from './role/role.module.ts';
 import { PermissionsModule } from './permissions/permissions.module.ts';
 import { ConfigModule } from '@nestjs/config';
@@ -29,7 +28,6 @@ import { ContactModule } from './contact/contact.module.js';
     ContactModule,
     CompanyModule,
     RoleModule,
-    DatabaseModule,
     PermissionsModule,
   ],
   controllers: [AppController],
