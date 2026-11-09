@@ -1,2 +1,4 @@
 packages:
   - "packages/*"
+allowBuilds:
+  argon2: false
