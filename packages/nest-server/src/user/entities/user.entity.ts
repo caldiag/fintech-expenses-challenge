@@ -7,18 +7,16 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
+import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
 import { CategoryEntity } from '../../category/entities/category.entity.ts';
 import { TransactionEntity } from '../../transaction/entities/transaction.entity.ts';
 import { RoleEntity } from '../../role/entities/role.entity.ts';
 import { PermissionSetEntity } from '../../permissions/entities/permission-set.entity.ts';
 
 @Entity()
-export class UserEntity {
+export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column('timestamp')
-  createdAt: Date;
 
   @Column('varchar')
   firstName: string;
@@ -26,7 +24,7 @@ export class UserEntity {
   @Column('varchar')
   lastName: string;
 
-  @Column('varchar')
+  @Column('varchar', { unique: true })
   email: string;
 
   @Column('varchar')
@@ -38,7 +36,7 @@ export class UserEntity {
   @OneToMany(() => CategoryEntity, (category) => category.createdBy)
   categories: Relation<CategoryEntity[]>;
 
-  @ManyToOne(() => RoleEntity, (role) => role.users, { nullable: false })
+  @ManyToOne(() => RoleEntity, (role) => role.users, { nullable: true })
   role: Relation<RoleEntity>;
 
   @OneToOne(() => PermissionSetEntity, (permissionSet) => permissionSet.user)
