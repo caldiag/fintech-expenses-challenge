@@ -21,7 +21,6 @@ import { RoleModule } from './role/role.module.js';
       username: 'root',
       password: 'root',
       database: 'test',
-      entities: [],
       autoLoadEntities: true,
       synchronize: false,
     }),

@@ -1,6 +1,8 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { UserEntity } from '../../user/entity/user.entity.js';
 import { Currency } from '@app/types';
+import { CategoryEntity } from '../../category/entity/category.entity.js';
 
 @Entity()
 export class TransactionEntity {
@@ -13,12 +15,15 @@ export class TransactionEntity {
   @Column(() => Number)
   amountCents: number;
 
-  @Column()
+  @Column(() => String)
   currency: Currency;
 
   @Column(() => String)
   description: string;
 
-  @OneToMany(() => UserEntity, (user) => user.id)
-  createdBy: UserEntity;
+  @ManyToOne(() => CategoryEntity, (category) => category.transactions)
+  category: Relation<CategoryEntity>;
+
+  @ManyToOne(() => UserEntity, (user) => user.transactions)
+  createdBy: Relation<UserEntity>;
 }

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CategoryEntity } from './entity/category.entity.js';
 
-@Module({})
+@Module({ providers: [], exports: [CategoryEntity] })
 export class CategoryModule {}
