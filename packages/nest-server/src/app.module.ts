@@ -13,7 +13,8 @@ import { PermissionsModule } from './permissions/permissions.module.ts';
 import { ConfigModule } from '@nestjs/config';
 import { AppDataSource } from './typeorm/datasource.ts';
 import { ContactModule } from './contact/contact.module.js';
-import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/guard/auth.guard.ts';
 
 @Module({
   imports: [
@@ -30,9 +31,11 @@ import { JwtModule } from '@nestjs/jwt';
     CompanyModule,
     RoleModule,
     PermissionsModule,
-    JwtModule.register({ secret: process.env.JWT_SECRET }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: AuthGuard },
+  ],
 })
 export class AppModule {}
