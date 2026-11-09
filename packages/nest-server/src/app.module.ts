@@ -11,6 +11,7 @@ import { ConfigModule } from './config/config.module.js';
 import { CompanyModule } from './company/company.module.js';
 import { DatabaseModule } from './database/database.module.js';
 import { RoleModule } from './role/role.module.js';
+import { PermissionsModule } from './permissions/permissions.module.js';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RoleModule } from './role/role.module.js';
     CompanyModule,
     RoleModule,
     DatabaseModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

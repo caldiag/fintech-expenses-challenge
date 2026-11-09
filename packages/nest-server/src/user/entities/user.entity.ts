@@ -6,9 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { CategoryEntity } from '../../category/entity/category.entity.js';
-import { TransactionEntity } from '../../transaction/entity/transaction.entity.js';
-import { RoleEntity } from '../../role/entity/role.entity.js';
+import { CategoryEntity } from '../../category/entities/category.entity.js';
+import { TransactionEntity } from '../../transaction/entities/transaction.entity.js';
+import { RoleEntity } from '../../role/entities/role.entity.js';
 
 @Entity()
 export class UserEntity {

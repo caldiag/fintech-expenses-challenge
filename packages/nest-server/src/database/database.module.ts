@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { TransactionEntity } from '../transaction/entity/transaction.entity.js';
-import { UserEntity } from '../user/entity/user.entity.js';
-import { CategoryEntity } from '../category/entity/category.entity.js';
+import { TransactionEntity } from '../transaction/entities/transaction.entity.js';
+import { UserEntity } from '../user/entities/user.entity.js';
+import { CategoryEntity } from '../category/entities/category.entity.js';
 
 @Module({
   imports: [
