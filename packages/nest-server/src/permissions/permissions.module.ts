@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PermissionsEntity } from './entities/permissions.entity.js';
+import { PermissionSetEntity } from './entities/permission-set.entity.ts';
 
-@Module({ exports: [PermissionsEntity] })
+@Module({ providers: [PermissionSetEntity] })
 export class PermissionsModule {}
