@@ -1,0 +1,12 @@
+{
+  "name": "@fintech-expenses-challenge",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k -n react,nest \"pnpm --filter @app/react-client dev\" \"pnpm --filter @app/nest-server start:dev\"",
+    "build": "pnpm -r --sort build",
+    "start": "pnpm --filter @app/nest-server start:prod"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  }
+}
