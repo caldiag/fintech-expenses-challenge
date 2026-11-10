@@ -24,11 +24,15 @@ export class AuthService {
     return this.jwtService.verify(token);
   }
 
+  decodeToken(token: string): any {
+    return this.jwtService.decode(token);
+  }
+
   async validateLoginOrFail(
     loginInfo: AccountCredentialsDTO,
   ): Promise<UserEntity> {
     const { email, password } = loginInfo;
-    const user = await this.UserService.getUserByEmail(email);
+    const user = await this.UserService.getUserByEmail(email, true);
 
     if (!user || !(await verifyPassword(user.passwordHash, password))) {
       throw new UnauthorizedException();

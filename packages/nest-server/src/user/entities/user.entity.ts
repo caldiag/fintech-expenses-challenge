@@ -26,7 +26,7 @@ export class UserEntity extends BaseEntity {
   @Column('varchar', { unique: true })
   email: string;
 
-  @Column('varchar')
+  @Column('varchar', { select: false })
   passwordHash: string;
 
   @OneToMany(() => TransactionEntity, (transaction) => transaction.createdBy)

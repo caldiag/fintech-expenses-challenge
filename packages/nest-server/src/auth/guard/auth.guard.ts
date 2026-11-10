@@ -16,8 +16,9 @@ export class AuthGuard implements CanActivate {
     ]);
     if (isPublic) return true;
 
-    const headers = context.switchToHttp().getRequest().headers;
-    const token = headers['authorization'];
+    const req = context.switchToHttp().getRequest();
+    const token = req.cookies?.authorization;
+    req.userId = this.authService.decodeToken(token).id;
     if (token) {
       this.authService.verifyToken(token);
       return true;

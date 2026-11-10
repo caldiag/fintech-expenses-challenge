@@ -12,7 +12,16 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
-  async getUserByEmail(email: string): Promise<UserEntity | null> {
+  async getUserByEmail(
+    email: string,
+    includePasswordHash = false,
+  ): Promise<UserEntity | null> {
+    if (includePasswordHash)
+      return await this.userRepository
+        .createQueryBuilder('user')
+        .addSelect('user.passwordHash')
+        .where('user.email = :email', { email })
+        .getOne();
     return await this.userRepository.findOne({
       where: { email },
     });
