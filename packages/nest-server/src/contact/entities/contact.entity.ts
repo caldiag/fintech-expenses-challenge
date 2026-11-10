@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
+import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 import { CompanyEntity } from '../../company/entities/company.entity.ts';
 

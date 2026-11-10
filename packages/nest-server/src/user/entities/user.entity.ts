@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
+import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { TransactionEntity } from '../../transaction/entities/transaction.entity.ts';
 import { RoleEntity } from '../../permissions/entities/role.entity.ts';
 import { PermissionSetEntity } from '../../permissions/entities/permission-set.entity.ts';

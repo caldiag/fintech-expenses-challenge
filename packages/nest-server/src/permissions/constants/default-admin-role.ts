@@ -1,0 +1,1 @@
+export const DEFAULT_ADMIN_ROLE = '65d37e58-15fe-4b86-9349-5c8a435d027b';

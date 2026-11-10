@@ -10,9 +10,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.ts';
-import { AccountCredentialsDTO as AccountCredentialsDTO } from './dto/AccountCredentials.dto.ts';
+import { AccountCredentialsDTO as AccountCredentialsDTO } from './dto/account-credentials.dto.ts';
 import { Public } from './guard/public.decorator.ts';
-import { CreateUserDTO } from '../user/dto/User.dto.ts';
+import { CreateUserDTO } from '../user/dto/user.dto.ts';
 import type { Response } from 'express';
 import { UserContext } from './guard/context.decorator.ts';
 import { UserService } from '../user/user.service.ts';

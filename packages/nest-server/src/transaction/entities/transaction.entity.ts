@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
-import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
+import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 import { Currency } from '@app/types';
 import { TransactionCategoryEntity } from './transaction-category.entity.ts';
