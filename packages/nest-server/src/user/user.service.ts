@@ -24,10 +24,14 @@ export class UserService {
         .getOne();
     return await this.userRepository.findOne({
       where: { email },
+      relations: { role: true },
     });
   }
   async getUserById(id: string): Promise<UserEntity | null> {
-    return await this.userRepository.findOne({ where: { id } });
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: { role: true },
+    });
   }
 
   async createUser(user: CreateUserDTO): Promise<UserEntity> {
