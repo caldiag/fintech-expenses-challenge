@@ -1,16 +1,28 @@
-import { Button } from "~/components/ui/button"
+import { useEffect } from "react"
+import axios, { type AxiosResponse } from "axios"
+import { useNavigate } from "react-router"
+import { serverUrl } from "~/lib/server-url"
+import { type AuthContext, useAuthContext } from "~/auth/hooks/useAuthContext"
 
 export default function Home() {
-  return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-      </div>
-    </div>
-  )
+  const navigate = useNavigate()
+  const { authContext, setAuthContext } = useAuthContext()
+
+  useEffect(() => {
+    checkLogin()
+  }, [])
+
+  function checkLogin(): void {
+    //uses httpOnly cookies
+    axios
+      .get(`${serverUrl()}/login/me`, { withCredentials: true })
+      .then((d: AxiosResponse<AuthContext>) => {
+        setAuthContext(d.data)
+      })
+      .catch(() => {
+        navigate("/login")
+      })
+  }
+
+  return authContext?.id ? <div>Você está logado</div> : null
 }
