@@ -8,9 +8,8 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
-import { CategoryEntity } from '../../category/entities/category.entity.ts';
 import { TransactionEntity } from '../../transaction/entities/transaction.entity.ts';
-import { RoleEntity } from '../../role/entities/role.entity.ts';
+import { RoleEntity } from '../../permissions/entities/role.entity.ts';
 import { PermissionSetEntity } from '../../permissions/entities/permission-set.entity.ts';
 
 @Entity()
@@ -32,9 +31,6 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => TransactionEntity, (transaction) => transaction.createdBy)
   transactions: Relation<TransactionEntity[]>;
-
-  @OneToMany(() => CategoryEntity, (category) => category.createdBy)
-  categories: Relation<CategoryEntity[]>;
 
   @ManyToOne(() => RoleEntity, (role) => role.users, { nullable: true })
   role: Relation<RoleEntity>;

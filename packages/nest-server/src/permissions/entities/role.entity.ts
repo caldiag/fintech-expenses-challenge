@@ -8,7 +8,7 @@ import {
 import type { Relation } from 'typeorm';
 import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
-import { PermissionSetEntity } from '../../permissions/entities/permission-set.entity.ts';
+import { PermissionSetEntity } from './permission-set.entity.ts';
 
 @Entity()
 export class RoleEntity extends BaseEntity {

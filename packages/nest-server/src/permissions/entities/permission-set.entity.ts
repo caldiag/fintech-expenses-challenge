@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
-import { RoleEntity } from '../../role/entities/role.entity.ts';
+import { RoleEntity } from './role.entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 
 @Entity()

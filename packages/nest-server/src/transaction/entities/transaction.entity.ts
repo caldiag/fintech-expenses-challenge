@@ -3,7 +3,7 @@ import type { Relation } from 'typeorm';
 import { BaseEntity } from '../../typeorm/entities/BaseEntity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 import { Currency } from '@app/types';
-import { CategoryEntity } from '../../category/entities/category.entity.ts';
+import { TransactionCategoryEntity } from './transaction-category.entity.ts';
 
 @Entity()
 export class TransactionEntity extends BaseEntity {
@@ -22,8 +22,11 @@ export class TransactionEntity extends BaseEntity {
   @Column('varchar')
   description: string;
 
-  @ManyToOne(() => CategoryEntity, (category) => category.transactions)
-  category: Relation<CategoryEntity>;
+  @ManyToOne(
+    () => TransactionCategoryEntity,
+    (category) => category.transactions,
+  )
+  transactionCategory: Relation<TransactionCategoryEntity>;
 
   @ManyToOne(() => UserEntity, (user) => user.transactions)
   createdBy: Relation<UserEntity>;
