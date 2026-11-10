@@ -1,8 +1,9 @@
 import { useEffect } from "react"
-import axios, { type AxiosResponse } from "axios"
+import { type AxiosResponse } from "axios"
 import { useNavigate } from "react-router"
-import { serverUrl } from "~/lib/server-url"
 import { type AuthContext, useAuthContext } from "~/auth/hooks/useAuthContext"
+import NoRole from "~/components/error/no-role"
+import axiosClient from "~/auth/axios-client"
 
 export default function Home() {
   const navigate = useNavigate()
@@ -13,9 +14,8 @@ export default function Home() {
   }, [])
 
   function checkLogin(): void {
-    //uses httpOnly cookies
-    axios
-      .get(`${serverUrl()}/login/me`, { withCredentials: true })
+    axiosClient
+      .get(`/login/me`)
       .then((d: AxiosResponse<AuthContext>) => {
         setAuthContext(d.data)
       })
@@ -24,5 +24,5 @@ export default function Home() {
       })
   }
 
-  return authContext?.id ? <div>Você está logado</div> : null
+  return authContext?.id && (!authContext.role ? <NoRole /> : null)
 }
