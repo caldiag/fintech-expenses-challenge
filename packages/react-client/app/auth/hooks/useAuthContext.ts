@@ -1,12 +1,5 @@
 import { useState } from "react"
-
-export type AuthContext = {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  role: string | null
-}
+import type { AuthContext } from "~/types/AuthContext"
 
 export function useAuthContext() {
   const [authContext, setAuthContext] = useState<AuthContext>()

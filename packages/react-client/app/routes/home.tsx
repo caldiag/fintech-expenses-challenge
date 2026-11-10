@@ -1,9 +1,10 @@
 import { useEffect } from "react"
 import { type AxiosResponse } from "axios"
 import { useNavigate } from "react-router"
-import { type AuthContext, useAuthContext } from "~/auth/hooks/useAuthContext"
+import { useAuthContext } from "~/auth/hooks/useAuthContext"
 import NoRole from "~/components/error/no-role"
 import axiosClient from "~/auth/axios-client"
+import type { AuthContext } from "~/types/AuthContext"
 
 export default function Home() {
   const navigate = useNavigate()

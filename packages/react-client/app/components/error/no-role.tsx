@@ -1,9 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
-import {
-  IconAlertCircle,
-  IconAlertTriangle,
-  IconHome,
-} from "@tabler/icons-react"
+import { IconAlertTriangle } from "@tabler/icons-react"
 
 export default function NoRole() {
   return (
