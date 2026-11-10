@@ -1,3 +1,5 @@
 export function serverUrl(): string {
-  return `http://${window.location.hostname}:3000`
+  const hostname =
+    typeof window === "undefined" ? "localhost" : window.location.hostname
+  return `http://${hostname}:3000`
 }
