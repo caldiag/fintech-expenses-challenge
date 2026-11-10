@@ -28,7 +28,7 @@ export class UserService {
     });
   }
   async getUserById(id: string): Promise<UserEntity | null> {
-    return await this.userRepository.findOne({
+    return await this.userRepository.findOneOrFail({
       where: { id },
       relations: { role: true },
     });
@@ -45,5 +45,16 @@ export class UserService {
       email,
       passwordHash: await hashPassword(password),
     });
+  }
+
+  async updateUser(
+    userId: string,
+    payload: Partial<UserEntity>,
+  ): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return await this.userRepository.save({ ...user, ...payload });
   }
 }

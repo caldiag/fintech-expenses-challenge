@@ -26,24 +26,28 @@ export class PermissionSetEntity extends BaseEntity {
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   transactionCreateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   transactionReadScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   transactionUpdateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   transactionDeleteScope: PermissionScope;
 
@@ -51,24 +55,28 @@ export class PermissionSetEntity extends BaseEntity {
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   categoryCreateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   categoryReadScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   categoryUpdateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   categoryDeleteScope: PermissionScope;
 
@@ -76,24 +84,28 @@ export class PermissionSetEntity extends BaseEntity {
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   userCreateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   userReadScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   userUpdateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   userDeleteScope: PermissionScope;
 
@@ -101,24 +113,28 @@ export class PermissionSetEntity extends BaseEntity {
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   roleCreateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   roleReadScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   roleUpdateScope: PermissionScope;
   @Column({
     type: 'enum',
     enum: PermissionScope,
     enumName: 'permission_scope',
+    default: PermissionScope.OWN,
   })
   roleDeleteScope: PermissionScope;
 

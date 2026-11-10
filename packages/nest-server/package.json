@@ -12,7 +12,7 @@
     "deploy": "nest deploy",
     "gen-migrations": "sh -c 'if [ -z \"$1\" ]; then printf \"%s\\n\" \"Usage: pnpm gen-migrations <name>\" >&2; exit 1; fi; pnpm typeorm-ts-node-esm migration:generate -d src/typeorm/datasource.ts \"./src/typeorm/migrations/$1\"' --",
     "run-migrations": "pnpm typeorm-ts-node-esm migration:run -d src/typeorm/datasource.ts",
-    "reset-db": "sh -c 'found=; for file in src/typeorm/migrations/*.ts src/typeorm/migrations/*.js; do if [ -f \"$file\" ]; then found=1; break; fi; done; if [ -z \"$found\" ]; then printf \"%s\\n\" \"No migrations found; refusing to reset database.\" >&2; exit 1; fi; pnpm typeorm-ts-node-esm schema:drop -d src/typeorm/datasource.ts && pnpm typeorm-ts-node-esm migration:run -d src/typeorm/datasource.ts'",
+    "reset-db": "sh -c 'found=; for file in src/typeorm/migrations/*.ts src/typeorm/migrations/*.js; do if [ -f \"$file\" ]; then found=1; break; fi; done; if [ -z \"$found\" ]; then printf \"%s\\n\" \"No migrations found; refusing to reset database.\" >&2; exit 1; fi; pnpm typeorm-ts-node-esm schema:drop -d src/typeorm/datasource.ts && pnpm typeorm-ts-node-esm migration:run -d src/typeorm/datasource.ts && pnpm cli seed-admin'",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "pnpm --filter @app/types build && nest start",
     "start:dev": "pnpm --filter @app/types build && nest start --watch",
@@ -23,7 +23,8 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "cli": "pnpm build && node dist/cli.js"
   },
   "dependencies": {
     "@app/types": "workspace:*",
