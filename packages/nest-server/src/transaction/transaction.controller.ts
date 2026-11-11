@@ -83,7 +83,13 @@ export class TransactionController {
       userId,
       PermissionKey.TransactionUpdateScope,
     );
-    if (!this.permissionService.canAccessTransaction(scope, user, existing)) {
+    if (
+      !this.permissionService.canAccessTransaction(
+        user,
+        existing,
+        PermissionKey.TransactionUpdateScope,
+      )
+    ) {
       throw new ForbiddenException('Cannot update this transaction');
     }
     if (
@@ -108,12 +114,12 @@ export class TransactionController {
     const user = await this.userService.getUserById(userId);
     const transaction = await this.transactionService.findTransactionById(id);
     if (!transaction) throw new NotFoundException('Transaction not found');
-    const scope = await this.permissionService.validateUserPermissionScope(
-      userId,
-      PermissionKey.TransactionDeleteScope,
-    );
     if (
-      !this.permissionService.canAccessTransaction(scope, user, transaction)
+      !this.permissionService.canAccessTransaction(
+        user,
+        transaction,
+        PermissionKey.TransactionDeleteScope,
+      )
     ) {
       throw new ForbiddenException('Cannot delete this transaction');
     }
@@ -195,12 +201,12 @@ export class TransactionController {
     const transaction = await this.transactionService.findTransactionById(id);
     if (!transaction) throw new NotFoundException('Transaction not found');
 
-    const scope = await this.permissionService.validateUserPermissionScope(
-      userId,
-      PermissionKey.TransactionReadScope,
-    );
     if (
-      !this.permissionService.canAccessTransaction(scope, user, transaction)
+      !this.permissionService.canAccessTransaction(
+        user,
+        transaction,
+        PermissionKey.TransactionReadScope,
+      )
     ) {
       throw new ForbiddenException('Cannot read this transaction');
     }

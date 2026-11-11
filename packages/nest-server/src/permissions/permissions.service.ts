@@ -79,26 +79,28 @@ export class PermissionsService {
   ): Promise<PermissionScope> {
     const user = await this.userService.getUserById(userId);
     if (!user) throw new NotFoundException('User not found');
-    const userPermission = user.permissionSet
-      ? user.permissionSet
-      : user.role.permissionSet;
-
-    if (userPermission[permission]) return userPermission[permission];
-
-    //least privilege fallback
-    return PermissionScope.OWN;
+    return this.getUserPermissionScope(user, permission);
   }
 
   canAccessTransaction(
-    scope: PermissionScope,
     user: Awaited<ReturnType<UserService['getUserById']>>,
     transaction: TransactionEntity,
+    permission: PermissionKey,
   ): boolean {
     if (!user) return false;
+    const scope = this.getUserPermissionScope(user, permission);
     if (scope === PermissionScope.ALL) return true;
     if (scope === PermissionScope.ROLE) {
       return Boolean(user.role && transaction.role.id === user.role.id);
     }
     return transaction.createdBy?.id === user.id;
+  }
+
+  private getUserPermissionScope(
+    user: NonNullable<Awaited<ReturnType<UserService['getUserById']>>>,
+    permission: PermissionKey,
+  ): PermissionScope {
+    const userPermission = user.permissionSet ?? user.role?.permissionSet;
+    return userPermission?.[permission] ?? PermissionScope.OWN;
   }
 }
