@@ -1,8 +1,10 @@
 import { SortDirection } from "@app/types"
 import { IconCurrencyDollar, IconUser } from "@tabler/icons-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import axiosClient from "~/auth/axios-client"
 import RecordTable from "~/components/data-display/record-table"
 import { Button } from "~/components/ui/button"
+import { formatSmart } from "~/lib/utils/format-date"
 
 export default function Transactions() {
   const [tableData, setTableData] = useState<any[]>([
@@ -25,6 +27,14 @@ export default function Transactions() {
     SortDirection.DESC
   )
   const [sortBy, setSortBy] = useState<string>("date")
+
+  useEffect(() => {
+    axiosClient.get("/transaction/all").then((d) => {
+      setTableData(
+        d.data.map((transaction: any) => parseTableData(transaction))
+      )
+    })
+  }, [])
 
   return (
     <div className="w-fill">
@@ -57,4 +67,14 @@ export default function Transactions() {
       />
     </div>
   )
+}
+
+function parseTableData(data: any) {
+  return {
+    date: formatSmart(new Date(data.createdAt)),
+    amount: data.amount + "," + data.amountCents,
+    description: data.description,
+    category: data.transactionCategory.name,
+    createdBy: `${data.createdBy.firstName} ${data.createdBy.lastName}`,
+  }
 }
