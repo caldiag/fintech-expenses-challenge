@@ -59,6 +59,7 @@ export class TransactionController {
   async getAllTransactions(
     @UserContext() userId: string,
     @Query() query: GetTransactionsDTO,
+    @Query('page') pageParam?: string,
   ) {
     const user = await this.userService.getUserById(userId);
     if (!user) throw new BadRequestException('User not found');
@@ -80,7 +81,12 @@ export class TransactionController {
       filters.createdById = user.id;
     }
 
-    return await this.transactionService.findTransactions(filters, 0);
+    const page = Number(pageParam ?? 0);
+    if (!Number.isInteger(page) || page < 0) {
+      throw new BadRequestException('Page must be a non-negative integer');
+    }
+
+    return await this.transactionService.findTransactions(filters, page);
   }
 
   @Post('category/create')
