@@ -31,7 +31,7 @@ export default function RecordTable({
   setColumnSortDirection,
 }: RecordTableProps) {
   return (
-    <div className="overflow-hidden rounded-sm border">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>

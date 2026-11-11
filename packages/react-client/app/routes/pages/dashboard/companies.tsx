@@ -1,5 +1,5 @@
 import { SortDirection } from "@app/types"
-import { IconBuilding, IconCurrencyDollar, IconUser } from "@tabler/icons-react"
+import { IconBuilding, IconUser } from "@tabler/icons-react"
 import { useState } from "react"
 import RecordTable from "~/components/data-display/record-table"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
@@ -22,7 +22,7 @@ export default function Companies() {
   return (
     <div className="w-fill">
       <h3 className="mb-4 flex items-center gap-1">
-        <IconCurrencyDollar size={18} /> Empresas
+        <IconBuilding size={18} /> Empresas
       </h3>
       <RecordTable
         data={tableData}
