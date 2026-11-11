@@ -6,7 +6,7 @@ export default class CreateTransactionCategoryDTO {
 
   @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 
   @IsString()
   icon: string;

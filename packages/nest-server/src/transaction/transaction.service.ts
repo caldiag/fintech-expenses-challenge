@@ -1,9 +1,12 @@
-import { Currency } from '@app/types';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Like, Repository } from 'typeorm';
+import { OrderDirection } from '../typeorm/dto/filtered-find.dto.ts';
 import CreateTransactionCategoryDTO from './dto/create-transaction-category.dto.ts';
 import CreateTransactionDTO from './dto/create-transaction.dto.ts';
+import GetTransactionsDTO, {
+  TransactionOrderBy,
+} from './dto/get-transactions.dto.ts';
 import { TransactionCategoryEntity } from './entities/transaction-category.entity.ts';
 import { TransactionEntity } from './entities/transaction.entity.ts';
 
@@ -38,12 +41,21 @@ export class TransactionService {
     });
   }
 
+  async findTransactionCategoryById(
+    id: string,
+  ): Promise<TransactionCategoryEntity | null> {
+    return await this.transactionCategoryReporitory.findOne({ where: { id } });
+  }
+  async findAllTransactionCategories(): Promise<TransactionCategoryEntity[]> {
+    return await this.transactionCategoryReporitory.find();
+  }
+
   async findTransactions(
-    filters: FindTransactionFilters,
+    filters: GetTransactionsDTO,
     page: number,
     limit?: number,
-    orderBy: TransactionOrderBy = 'createdAt',
-    orderDirection: 'ASC' | 'DESC' = 'DESC',
+    orderBy: TransactionOrderBy = TransactionOrderBy.CreatedAt,
+    orderDirection: OrderDirection = OrderDirection.DESC,
   ): Promise<TransactionEntity[]> {
     const pageSize = limit ?? 1000;
     const queryBuilder = this.transactionRepository
@@ -72,20 +84,6 @@ export class TransactionService {
     return await queryBuilder.getMany();
   }
 }
-
-type FindTransactionFilters = {
-  description?: string;
-  transactionCategoryId?: string;
-  createdById?: string;
-  fromDate?: Date;
-  toDate?: Date;
-  amount?: number;
-  amountCents?: number;
-  currency?: Currency;
-  roleId?: string;
-};
-
-type TransactionOrderBy = 'amount' | 'createdAt' | 'updatedAt' | 'currency';
 
 const TRANSACTION_ORDER_COLUMNS: Record<TransactionOrderBy, string> = {
   amount: 'transaction.amount',

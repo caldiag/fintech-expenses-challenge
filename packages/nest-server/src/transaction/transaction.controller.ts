@@ -1,13 +1,30 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { PermissionKey, PermissionScope } from '@app/types';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
+import { PermissionsService } from '../permissions/permissions.service.ts';
+import { UserService } from '../user/user.service.ts';
 import CreateTransactionCategoryDTO from './dto/create-transaction-category.dto.ts';
 import CreateTransactionDTO from './dto/create-transaction.dto.ts';
+import GetTransactionsDTO from './dto/get-transactions.dto.ts';
+import { TransactionCategoryEntity } from './entities/transaction-category.entity.ts';
 import { TransactionEntity } from './entities/transaction.entity.ts';
 import { TransactionService } from './transaction.service.ts';
 
 @Controller('transaction')
 export class TransactionController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly userService: UserService,
+    private readonly permissionService: PermissionsService,
+  ) {}
 
   @Post('create')
   async createTransaction(
@@ -21,14 +38,54 @@ export class TransactionController {
     );
   }
 
+  @Get('all')
+  async getAllTransactions(
+    @UserContext() userId: string,
+    @Query() query: GetTransactionsDTO,
+  ) {
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new BadRequestException('User not found');
+
+    const readScope = await this.permissionService.validateUserPermissionScope(
+      user.id,
+      PermissionKey.TransactionReadScope,
+    );
+
+    const filters = { ...query };
+
+    if (filters.roleId && readScope === PermissionScope.ROLE) {
+      //force filtering by their role if they can't access a different role
+      filters.roleId = user.role.id;
+    }
+
+    if (readScope === PermissionScope.OWN) {
+      //tried to filter from a user but they don't have access to other users' transactions
+      filters.createdById = user.id;
+    }
+
+    return await this.transactionService.findTransactions(filters, 0);
+  }
+
   @Post('category/create')
   async createTransactionCategory(
-    @Body() transaction: CreateTransactionCategoryDTO,
+    @Body() transactionCategory: CreateTransactionCategoryDTO,
     @UserContext() userId: string,
   ) {
     return await this.transactionService.createTransactionCategory(
-      transaction,
+      transactionCategory,
       userId,
     );
+  }
+
+  @Get('category/all')
+  async getAllTransactionCategories(): Promise<TransactionCategoryEntity[]> {
+    return await this.transactionService.findAllTransactionCategories();
+  }
+
+  @Get('category/:id')
+  async getTransactionCategory(
+    @Param() id: string,
+  ): Promise<TransactionCategoryEntity | null> {
+    return await this.transactionService.findTransactionCategoryById(id);
   }
 }
