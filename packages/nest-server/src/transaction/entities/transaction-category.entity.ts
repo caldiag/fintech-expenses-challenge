@@ -1,3 +1,4 @@
+import type { Relation } from 'typeorm';
 import {
   Column,
   Entity,
@@ -5,7 +6,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import type { Relation } from 'typeorm';
 import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
 import { TransactionEntity } from './transaction.entity.ts';

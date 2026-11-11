@@ -1,7 +1,9 @@
 import { Currency } from '@app/types';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, DataSource, Like, Repository } from 'typeorm';
+import { Between, Like, Repository } from 'typeorm';
+import CreateTransactionCategoryDTO from './dto/create-transaction-category.dto.ts';
+import CreateTransactionDTO from './dto/create-transaction.dto.ts';
 import { TransactionCategoryEntity } from './entities/transaction-category.entity.ts';
 import { TransactionEntity } from './entities/transaction.entity.ts';
 
@@ -12,41 +14,66 @@ export class TransactionService {
     private readonly transactionRepository: Repository<TransactionEntity>,
     @InjectRepository(TransactionCategoryEntity)
     private readonly transactionCategoryReporitory: Repository<TransactionCategoryEntity>,
-    private readonly dataSource: DataSource,
   ) {}
 
   async createTransaction(
-    transaction: Omit<TransactionEntity, 'id'>,
-  ): Promise<TransactionEntity | null> {
-    await this.transactionRepository.save(transaction);
-    return null;
+    transaction: Omit<CreateTransactionDTO, 'id'>,
+    transactionCategoryId: string,
+    createdByUserId: string,
+  ): Promise<TransactionEntity> {
+    return await this.transactionRepository.save({
+      ...transaction,
+      transactionCategory: { id: transactionCategoryId },
+      createdBy: { id: createdByUserId },
+    });
   }
+
+  async createTransactionCategory(
+    transactionCategory: CreateTransactionCategoryDTO,
+    createdByUserId: string,
+  ): Promise<TransactionCategoryEntity> {
+    return await this.transactionCategoryReporitory.save({
+      ...transactionCategory,
+      createdBy: { id: createdByUserId },
+    });
+  }
+
   async findTransactions(
     filters: FindTransactionFilters,
     page: number,
     limit?: number,
+    orderBy: TransactionOrderBy = 'createdAt',
+    orderDirection: 'ASC' | 'DESC' = 'DESC',
   ): Promise<TransactionEntity[]> {
+    const pageSize = limit ?? 1000;
     const queryBuilder = this.transactionRepository
       .createQueryBuilder('transaction')
-      .limit(limit ?? 1000)
-      .offset(page * (limit ?? 0))
-      .where({
-        name: Like(filters.name),
-        description: Like(filters.description),
-        transactionCategory: { id: filters.transactionCategoryId },
-        createdBy: { id: filters.createdById },
-        createdAt: Between(filters.fromDate, filters.toDate),
-        amount: filters.amount,
-        amountCents: filters.amount,
-        currency: filters.currency,
-        role: { id: filters.roleId },
-      });
+      .take(pageSize)
+      .skip(page * pageSize)
+      .orderBy(TRANSACTION_ORDER_COLUMNS[orderBy], orderDirection);
+
+    if (orderBy === 'amount') {
+      queryBuilder.addOrderBy('transaction.amountCents', orderDirection);
+    }
+
+    queryBuilder.addOrderBy('transaction.id', orderDirection).where({
+      description: filters.description ? Like(filters.description) : undefined,
+      transactionCategory: { id: filters.transactionCategoryId },
+      createdBy: { id: filters.createdById },
+      createdAt:
+        filters.fromDate && filters.toDate
+          ? Between(filters.fromDate, filters.toDate)
+          : undefined,
+      amount: filters.amount,
+      amountCents: filters.amountCents,
+      currency: filters.currency,
+      role: { id: filters.roleId },
+    });
     return await queryBuilder.getMany();
   }
 }
 
 type FindTransactionFilters = {
-  name?: string;
   description?: string;
   transactionCategoryId?: string;
   createdById?: string;
@@ -56,4 +83,13 @@ type FindTransactionFilters = {
   amountCents?: number;
   currency?: Currency;
   roleId?: string;
+};
+
+type TransactionOrderBy = 'amount' | 'createdAt' | 'updatedAt' | 'currency';
+
+const TRANSACTION_ORDER_COLUMNS: Record<TransactionOrderBy, string> = {
+  amount: 'transaction.amount',
+  createdAt: 'transaction.createdAt',
+  updatedAt: 'transaction.updatedAt',
+  currency: 'transaction.currency',
 };
