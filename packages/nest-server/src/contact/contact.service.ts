@@ -21,7 +21,14 @@ export class ContactService {
     totalPages: number;
   }> {
     const where: FindOptionsWhere<ContactEntity> = {
-      ...(filters.createdById && { createdBy: { id: filters.createdById } }),
+      ...((filters.createdById || filters.createdByRoleId) && {
+        createdBy: {
+          ...(filters.createdById && { id: filters.createdById }),
+          ...(filters.createdByRoleId && {
+            role: { id: filters.createdByRoleId },
+          }),
+        },
+      }),
       ...(filters.fromDate &&
         filters.toDate && {
           createdAt: Between(
@@ -59,6 +66,29 @@ export class ContactService {
       companies: companyIds.map((id) => ({ id })),
       createdBy: { id: createdByUserId },
     });
+  }
+
+  async findContactById(id: string): Promise<ContactEntity | null> {
+    return await this.contactRepository.findOne({
+      where: { id },
+      relations: { companies: true, createdBy: { role: true } },
+    });
+  }
+
+  async updateContact(
+    id: string,
+    contact: CreateContactDTO,
+  ): Promise<ContactEntity> {
+    const { companyIds = [], ...contactData } = contact;
+    return await this.contactRepository.save({
+      id,
+      ...contactData,
+      companies: companyIds.map((companyId) => ({ id: companyId })),
+    });
+  }
+
+  async deleteContact(id: string): Promise<void> {
+    await this.contactRepository.softDelete(id);
   }
 }
 

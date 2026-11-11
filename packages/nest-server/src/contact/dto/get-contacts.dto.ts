@@ -6,6 +6,10 @@ export default class GetContactsDTO {
   createdById?: string;
 
   @IsOptional()
+  @IsUUID('4')
+  createdByRoleId?: string;
+
+  @IsOptional()
   @IsDateString()
   fromDate?: string;
 
