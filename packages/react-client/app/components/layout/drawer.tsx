@@ -1,5 +1,4 @@
 import {
-  IconBookmark,
   IconBuilding,
   IconCurrencyDollar,
   IconHome,
@@ -10,7 +9,7 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { Separator } from "~/components/ui/separator"
 import { AppRoutes } from "~/routes"
-import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty"
+import { Empty, EmptyDescription } from "../ui/empty"
 
 export default function Drawer() {
   const { pathname } = useLocation()
@@ -73,10 +72,6 @@ export default function Drawer() {
         </Button>
         <Separator className="my-6" />
         <Empty className="opacity-60">
-          <EmptyMedia variant="icon" className="bg-sidebar-border">
-            <IconBookmark />
-          </EmptyMedia>
-          <EmptyTitle>Você ainda não tem favoritos</EmptyTitle>
           <EmptyDescription>
             Adicione empresas ou contatos à sua lista de favoritos e eles
             aparecerão aqui
