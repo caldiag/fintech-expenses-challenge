@@ -32,7 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog"
-import { FieldGroup, FieldLabel, FieldLegend, FieldSet } from "../ui/field"
+import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
 import { Popover, PopoverContent, PopoverTitle } from "../ui/popover"
 import { Textarea } from "../ui/textarea"
@@ -216,7 +216,6 @@ export default function CreateTransactionContent({
       </DialogHeader>
       <form onSubmit={submitTransaction}>
         <FieldGroup>
-          <FieldLegend>Informações básicas</FieldLegend>
           <FieldSet className="grid grid-cols-1 gap-3">
             <div>
               <FieldLabel htmlFor="transaction-description">

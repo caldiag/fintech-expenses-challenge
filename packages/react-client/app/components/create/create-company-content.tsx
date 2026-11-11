@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog"
-import { FieldGroup, FieldLabel, FieldLegend, FieldSet } from "../ui/field"
+import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
 import { Popover, PopoverContent } from "../ui/popover"
 
@@ -74,7 +74,6 @@ export default function CreateCompanyContent({
       </DialogHeader>
       <form onSubmit={submitCompany}>
         <FieldGroup>
-          <FieldLegend>Informações da empresa</FieldLegend>
           <FieldSet className="grid grid-cols-1 gap-3">
             <div>
               <FieldLabel htmlFor="company-name">Nome</FieldLabel>

@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog"
-import { FieldGroup, FieldLabel, FieldLegend, FieldSet } from "../ui/field"
+import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
 import { Textarea } from "../ui/textarea"
 
@@ -18,7 +18,6 @@ export default function CreateCompanyContent() {
       </DialogHeader>
       <FieldGroup>
         <FieldGroup>
-          <FieldLegend>Informações básicas</FieldLegend>
           <FieldSet className="grid grid-cols-2">
             <div>
               <FieldLabel>Nome</FieldLabel>
