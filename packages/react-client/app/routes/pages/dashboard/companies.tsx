@@ -1,24 +1,49 @@
 import { SortDirection } from "@app/types"
 import { IconArrowUpRight } from "@tabler/icons-react"
-import { useState } from "react"
-import CompanyCustomCell from "~/components/data-display/custom-cell/company"
+import { useEffect, useState } from "react"
+import axiosClient from "~/auth/axios-client"
+import CompanyCustomCell from "~/components/data-display/custom-cell/company-custom-cell"
 import RecordTable from "~/components/data-display/record-table"
 import { Button } from "~/components/ui/button"
 import { getTablerIcon } from "~/lib/utils/tabler-icons"
 
+type Company = {
+  name: string
+  websiteUrl: string
+  email: string | null
+  areaCode: string | null
+}
+
+type CompaniesResponse = {
+  companies: Company[]
+  totalPages: number
+}
+
 export default function Companies() {
-  const [tableData, setTableData] = useState<any[]>([
-    {
-      name: "Netflix",
-      websiteUrl: "netflix.com",
-      email: "netflix@netflix.com",
-      areaCode: "05528-001",
-    },
-  ])
+  const [tableData, setTableData] = useState<any[]>([])
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const [sortDirection, setSortDirection] = useState<SortDirection>(
     SortDirection.DESC
   )
   const [sortBy, setSortBy] = useState<string>("date")
+
+  useEffect(() => {
+    axiosClient
+      .get<CompaniesResponse>("/company/all", {
+        params: { page: currentPage },
+      })
+      .then(({ data }) => {
+        setTableData(
+          data.companies.map((company) => ({
+            ...company,
+            email: company.email ?? "-",
+            areaCode: company.areaCode ?? "-",
+          }))
+        )
+        setTotalPages(data.totalPages)
+      })
+  }, [currentPage])
 
   return (
     <div className="w-fill">
@@ -64,7 +89,10 @@ export default function Companies() {
           },
         ]}
         sortableColumnKeys={["name", "email"]}
-        tableCaption="Transactions"
+        tableCaption="Empresas"
+        totalPages={totalPages}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
         setColumnSortDirection={(key, dir) => {
           setSortBy(key)
           setSortDirection(dir)
