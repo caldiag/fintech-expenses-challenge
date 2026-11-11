@@ -1,15 +1,15 @@
 import { Currency, TransactionDirection } from '@app/types';
-import { IsEnum, IsNumber, IsString, IsUUID, Max } from 'class-validator';
+import { IsEnum, IsInt, IsString, IsUUID, Max } from 'class-validator';
 
 export default class CreateTransactionDTO {
   @IsString()
   description: string;
 
-  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @IsInt()
   @Max(2147483647)
   amount: number;
 
-  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
+  @IsInt()
   @Max(99)
   amountCents: number;
 
