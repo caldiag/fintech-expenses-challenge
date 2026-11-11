@@ -1,7 +1,7 @@
+import { SortDirection } from '@app/types';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Like, Repository } from 'typeorm';
-import { OrderDirection } from '../typeorm/dto/filtered-find.dto.ts';
 import CreateTransactionCategoryDTO from './dto/create-transaction-category.dto.ts';
 import CreateTransactionDTO from './dto/create-transaction.dto.ts';
 import GetTransactionsDTO, {
@@ -60,7 +60,7 @@ export class TransactionService {
     page: number,
     limit?: number,
     orderBy: TransactionOrderBy = TransactionOrderBy.CreatedAt,
-    orderDirection: OrderDirection = OrderDirection.DESC,
+    orderDirection: SortDirection = SortDirection.DESC,
   ): Promise<TransactionEntity[]> {
     const pageSize = limit ?? 1000;
     const queryBuilder = this.transactionRepository

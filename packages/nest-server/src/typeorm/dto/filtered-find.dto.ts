@@ -1,3 +1,4 @@
+import { SortDirection } from '@app/types';
 import { IsDate, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export default class FilteredFindDTO {
@@ -19,10 +20,5 @@ export default class FilteredFindDTO {
 
   @IsString()
   @IsOptional()
-  orderDirection?: OrderDirection;
-}
-
-export enum OrderDirection {
-  ASC = 'ASC',
-  DESC = 'DESC',
+  orderDirection?: SortDirection;
 }
