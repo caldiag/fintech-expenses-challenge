@@ -14,18 +14,22 @@ import { FieldSet, FieldGroup, Field, FieldLabel } from "~/components/ui/field"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { serverUrl } from "~/lib/server-url"
+import { Separator } from "~/components/ui/separator"
+import { IconArrowRight } from "@tabler/icons-react"
+import { Spinner } from "~/components/ui/spinner"
+import { toast } from "~/components/ui/toast"
 
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
-  const [authError, setAuthError] = useState("")
   const [isCreatingAccount, setIsCreatingAccount] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
   async function handleSubmit(): Promise<void> {
-    setAuthError("")
+    setIsLoading(true)
     // A successful response sets the authorization cookie.
     try {
       if (isCreatingAccount) {
@@ -44,30 +48,49 @@ export default function Login() {
         { withCredentials: true }
       )
       navigate("/")
+      return
     } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message
-        : undefined
-      setAuthError(
-        typeof message === "string"
-          ? message
-          : "Não foi possível conectar. Tente novamente."
-      )
+      setIsLoading(false)
+      toast.add({
+        type: "error",
+        title: "Erro",
+        description:
+          "Ocorreu um erro. Verifique seu usuário e senha e tente novamente.",
+      })
     }
   }
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      <Card className="min-w-80">
+    <div className="flex justify-end">
+      <div
+        className="absolute h-screen w-screen"
+        style={{
+          zIndex: 1,
+          background:
+            "linear-gradient(90deg, rgba(255, 255, 255, 0) -20%, rgba(255, 255, 255, 1) 80%)",
+        }}
+      />
+      <div className="absolute h-screen w-screen overflow-hidden">
+        <img
+          src="/assets/images/bg2.jpeg"
+          className="object-cover opacity-50"
+          alt="background"
+        />
+      </div>
+      <Card className="z-2 h-screen min-w-105">
         <CardHeader>
           <CardTitle>Login</CardTitle>
           <CardDescription>Acesse sua conta</CardDescription>
           <CardAction>
-            <Button variant="link" className="cursor-pointer">
-              Esqueci minha senha
+            <Button
+              variant="link"
+              onClick={() => setIsCreatingAccount((prev) => !prev)}
+            >
+              {!isCreatingAccount ? <>Criar conta</> : <>Voltar para o login</>}
             </Button>
           </CardAction>
         </CardHeader>
+        <Separator className="mb-5" />
         <CardContent>
           <FieldSet>
             <FieldGroup>
@@ -112,28 +135,31 @@ export default function Login() {
                   </Field>
                 </>
               )}
-              {authError && <p role="alert">{authError}</p>}
             </FieldGroup>
           </FieldSet>
         </CardContent>
-        <CardFooter className="flex-col gap-2">
+        <CardFooter className="mt-4 flex gap-2">
           <Field>
             <Button
               onClick={handleSubmit}
+              disabled={isLoading}
               variant="default"
               className="cursor-pointer"
             >
+              {isLoading && <Spinner />}
               {isCreatingAccount ? "Criar conta" : "Entrar"}
+              <IconArrowRight />
             </Button>
           </Field>
-          <Button
-            onClick={() => setIsCreatingAccount((prev) => !prev)}
-            variant="link"
-            className="cursor-pointer"
-          >
-            {!isCreatingAccount ? "Criar conta" : "Voltar para o login"}
-          </Button>
+          <Field>
+            <Button className={"cursor-pointer"} variant="ghost">
+              Esqueci minha senha
+            </Button>
+          </Field>
         </CardFooter>
+        <div className="flex h-full items-end justify-center opacity-50">
+          Caleb Durães
+        </div>
       </Card>
     </div>
   )
