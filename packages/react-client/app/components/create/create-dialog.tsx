@@ -1,4 +1,5 @@
 import { IconPlus } from "@tabler/icons-react"
+import { useState } from "react"
 import { useLocation } from "react-router"
 import { AppRoutes } from "~/routes"
 import { Button } from "../ui/button"
@@ -8,11 +9,12 @@ import CreateTransactionContent from "./create-transaction-content"
 
 export default function CreateDialog() {
   const { pathname } = useLocation()
+  const [open, setOpen] = useState(false)
 
   function getContent() {
     switch (pathname) {
       case AppRoutes.Transactions:
-        return <CreateTransactionContent />
+        return <CreateTransactionContent onCreated={() => setOpen(false)} />
       case AppRoutes.Companies:
         return <CreateCompanyContent />
       default:
@@ -21,12 +23,14 @@ export default function CreateDialog() {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <Button variant="outline" className="cursor-pointer">
-          <IconPlus /> Novo registro
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button variant="outline" className="cursor-pointer">
+            <IconPlus /> Novo registro
+          </Button>
+        }
+      />
       {getContent()}
     </Dialog>
   )

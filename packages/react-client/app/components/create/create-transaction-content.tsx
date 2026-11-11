@@ -1,7 +1,21 @@
 import { Currency } from "@app/types"
 import { Select } from "@base-ui/react/select"
-import { IconChevronDown, IconDeviceFloppy } from "@tabler/icons-react"
-import { useRef, useState } from "react"
+import {
+  IconBriefcase,
+  IconCar,
+  IconChevronDown,
+  IconDeviceFloppy,
+  IconDeviceMobile,
+  IconHome,
+  IconPlane,
+  IconPlus,
+  IconShoppingBag,
+  IconTag,
+  IconToolsKitchen2,
+  IconUser,
+} from "@tabler/icons-react"
+import { useEffect, useRef, useState } from "react"
+import axiosClient from "~/auth/axios-client"
 import {
   convertCurrencyAmount,
   currencies,
@@ -20,27 +34,236 @@ import {
 } from "../ui/dialog"
 import { FieldGroup, FieldLabel, FieldLegend, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
+import { Popover, PopoverContent, PopoverTitle } from "../ui/popover"
 import { Textarea } from "../ui/textarea"
 
-export default function CreateTransactionContent() {
+type TransactionCategory = {
+  id: string
+  name: string
+  icon: string
+}
+
+type TransactionRole = {
+  id: string
+  name: string
+  icon: string
+}
+
+const ADD_CATEGORY_VALUE = "__add-category__"
+const ADD_ROLE_VALUE = "__add-role__"
+
+const CATEGORY_ICON_MAP = {
+  IconBriefcase,
+  IconCar,
+  IconDeviceMobile,
+  IconHome,
+  IconPlane,
+  IconShoppingBag,
+  IconTag,
+  IconToolsKitchen2,
+  IconUser,
+}
+
+const CATEGORY_ICON_OPTIONS = [
+  { name: "IconTag", label: "Tag" },
+  { name: "IconUser", label: "Pessoa" },
+  { name: "IconHome", label: "Casa" },
+  { name: "IconCar", label: "Carro" },
+  { name: "IconShoppingBag", label: "Compras" },
+  { name: "IconToolsKitchen2", label: "Alimentação" },
+  { name: "IconBriefcase", label: "Trabalho" },
+  { name: "IconDeviceMobile", label: "Tecnologia" },
+  { name: "IconPlane", label: "Viagem" },
+] as const
+
+type CategoryIconName = keyof typeof CATEGORY_ICON_MAP
+
+function getIcon(iconName: string) {
+  return CATEGORY_ICON_MAP[iconName as CategoryIconName] ?? IconTag
+}
+
+export default function CreateTransactionContent({
+  onCreated,
+}: {
+  onCreated: () => void
+}) {
   const [currency, setCurrency] = useState<Currency>(Currency.BRL)
   const [amountDigits, setAmountDigits] = useState("")
+  const [description, setDescription] = useState("")
+  const [categories, setCategories] = useState<TransactionCategory[]>([])
+  const [roles, setRoles] = useState<TransactionRole[]>([])
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  )
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
+  const [isLoadingRoles, setIsLoadingRoles] = useState(true)
+  const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false)
+  const [isRolePopoverOpen, setIsRolePopoverOpen] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState("")
+  const [newRoleName, setNewRoleName] = useState("")
+  const [newCategoryIcon, setNewCategoryIcon] =
+    useState<CategoryIconName>("IconTag")
+  const [newRoleIcon, setNewRoleIcon] = useState<CategoryIconName>("IconTag")
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false)
+  const [isCreatingRole, setIsCreatingRole] = useState(false)
+  const [isSavingTransaction, setIsSavingTransaction] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const amountInputRef = useRef<HTMLInputElement>(null)
+  const categorySelectTriggerRef = useRef<HTMLButtonElement>(null)
+  const roleSelectTriggerRef = useRef<HTMLButtonElement>(null)
   const formattedAmount = formatCurrencyAmount(amountDigits, currency)
+  const selectedCategory = categories.find(
+    (category) => category.id === selectedCategoryId
+  )
+  const selectedRole = roles.find((role) => role.id === selectedRoleId)
+
+  useEffect(() => {
+    let active = true
+
+    async function loadCategories() {
+      try {
+        const response = await axiosClient.get<TransactionCategory[]>(
+          "/transaction/category/all"
+        )
+        if (active) setCategories(response.data)
+      } catch {
+        if (active) setError("Não foi possível carregar as categorias.")
+      } finally {
+        if (active) setIsLoadingCategories(false)
+      }
+    }
+
+    async function loadRoles() {
+      try {
+        const response = await axiosClient.get<TransactionRole[]>("/role/all")
+        if (active) setRoles(response.data)
+      } catch {
+        if (active) setError("Não foi possível carregar os setores.")
+      } finally {
+        if (active) setIsLoadingRoles(false)
+      }
+    }
+
+    void loadCategories()
+    void loadRoles()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  async function createCategory() {
+    const name = newCategoryName.trim()
+    if (!name) {
+      setError("Informe o nome da categoria.")
+      return
+    }
+
+    setError(null)
+    setIsCreatingCategory(true)
+    try {
+      const response = await axiosClient.post<TransactionCategory>(
+        "/transaction/category/create",
+        { name, icon: newCategoryIcon }
+      )
+      const category = response.data
+      setCategories((current) => [...current, category])
+      setSelectedCategoryId(category.id)
+      setNewCategoryName("")
+      setIsCategoryPopoverOpen(false)
+    } catch {
+      setError("Não foi possível criar a categoria.")
+    } finally {
+      setIsCreatingCategory(false)
+    }
+  }
+
+  async function createRole() {
+    const name = newRoleName.trim()
+    if (!name) {
+      setError("Informe o nome do setor.")
+      return
+    }
+
+    setError(null)
+    setIsCreatingRole(true)
+    try {
+      const response = await axiosClient.post<TransactionRole>("/role/create", {
+        name,
+        icon: newRoleIcon,
+      })
+      const role = response.data
+      setRoles((current) => [...current, role])
+      setSelectedRoleId(role.id)
+      setNewRoleName("")
+      setIsRolePopoverOpen(false)
+    } catch {
+      setError("Não foi possível criar o setor.")
+    } finally {
+      setIsCreatingRole(false)
+    }
+  }
+
+  async function submitTransaction(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selectedCategoryId) {
+      setError("Selecione uma categoria.")
+      return
+    }
+    if (!selectedRoleId) {
+      setError("Selecione um setor.")
+      return
+    }
+
+    const totalCents = Number.parseInt(amountDigits, 10)
+    if (!Number.isFinite(totalCents) || totalCents <= 0) {
+      setError("Informe um valor válido.")
+      return
+    }
+
+    setError(null)
+    setIsSavingTransaction(true)
+    try {
+      await axiosClient.post("/transaction/create", {
+        description: description.trim(),
+        amount: Math.floor(totalCents / 100),
+        amountCents: totalCents % 100,
+        currency,
+        transactionCategoryId: selectedCategoryId,
+        roleId: selectedRoleId,
+      })
+      onCreated()
+    } catch {
+      setError("Não foi possível salvar a transação.")
+    } finally {
+      setIsSavingTransaction(false)
+    }
+  }
 
   return (
     <DialogContent>
       <DialogHeader>
         <DialogTitle>Nova transação</DialogTitle>
       </DialogHeader>
-      <FieldGroup>
+      <form onSubmit={submitTransaction}>
         <FieldGroup>
           <FieldLegend>Informações básicas</FieldLegend>
-          <FieldSet className="grid grid-cols-2">
+          <FieldSet className="grid grid-cols-1 gap-3">
             <div>
-              <FieldLabel>Nome</FieldLabel>
-              <Input placeholder="Nome" />
+              <FieldLabel htmlFor="transaction-description">
+                Descrição
+              </FieldLabel>
+              <Textarea
+                id="transaction-description"
+                placeholder="Descrição da transação"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                required
+              />
             </div>
+          </FieldSet>
+          <FieldSet className="grid grid-cols-1 gap-3">
             <div>
               <FieldLabel htmlFor="transaction-amount">Valor</FieldLabel>
               <ButtonGroup aria-label="Valor da transação" className="w-full">
@@ -101,6 +324,7 @@ export default function CreateTransactionContent() {
                   placeholder="0"
                   value={formattedAmount}
                   className="text-right"
+                  required
                   onFocus={(event) => {
                     const end = event.currentTarget.value.length
                     event.currentTarget.setSelectionRange(end, end)
@@ -123,15 +347,365 @@ export default function CreateTransactionContent() {
               </ButtonGroup>
             </div>
           </FieldSet>
-          <FieldLabel>Descrição</FieldLabel>
-          <Textarea placeholder="Descrição" />
+          <FieldSet className="grid grid-cols-1 gap-3">
+            <div>
+              <FieldLabel htmlFor="transaction-category">Categoria</FieldLabel>
+              <Select.Root
+                value={selectedCategoryId}
+                onValueChange={(value) => {
+                  if (value === ADD_CATEGORY_VALUE) {
+                    setIsCategoryPopoverOpen(true)
+                    setError(null)
+                    return
+                  }
+                  setSelectedCategoryId(value)
+                  setError(null)
+                }}
+              >
+                <Select.Trigger
+                  ref={categorySelectTriggerRef}
+                  id="transaction-category"
+                  className="flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-input/20 px-2 text-left text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                >
+                  <Select.Value className="min-w-0 flex-1 text-left">
+                    {selectedCategory ? (
+                      <span className="flex min-w-0 items-center gap-2">
+                        {(() => {
+                          const CategoryIcon = getIcon(selectedCategory.icon)
+                          return <CategoryIcon className="size-4 shrink-0" />
+                        })()}
+                        <span className="truncate">
+                          {selectedCategory.name}
+                        </span>
+                      </span>
+                    ) : isLoadingCategories ? (
+                      "Carregando categorias..."
+                    ) : (
+                      "Selecione uma categoria"
+                    )}
+                  </Select.Value>
+                  <Select.Icon>
+                    <IconChevronDown className="size-3" />
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner
+                    sideOffset={4}
+                    className="z-50 outline-none"
+                  >
+                    <Select.Popup className="max-h-(--available-height) min-w-56 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                      <Select.List>
+                        <Select.Item
+                          value={ADD_CATEGORY_VALUE}
+                          className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                        >
+                          <Select.ItemText>
+                            <span className="flex items-center gap-2">
+                              <IconPlus className="size-3.5" />
+                              Adicionar categoria
+                            </span>
+                          </Select.ItemText>
+                        </Select.Item>
+                        {categories.map((category) => {
+                          const CategoryIcon = getIcon(category.icon)
+                          return (
+                            <Select.Item
+                              key={category.id}
+                              value={category.id}
+                              className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                            >
+                              <Select.ItemText>
+                                <span className="flex items-center gap-2">
+                                  <CategoryIcon className="size-4" />
+                                  {category.name}
+                                </span>
+                              </Select.ItemText>
+                            </Select.Item>
+                          )
+                        })}
+                      </Select.List>
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select.Root>
+              <Popover
+                open={isCategoryPopoverOpen}
+                onOpenChange={setIsCategoryPopoverOpen}
+              >
+                <PopoverContent
+                  anchor={categorySelectTriggerRef}
+                  align="start"
+                  className="w-80"
+                >
+                  <PopoverTitle>Nova categoria</PopoverTitle>
+                  <ButtonGroup
+                    aria-label="Ícone e nome da categoria"
+                    className="w-full"
+                  >
+                    <Select.Root
+                      value={newCategoryIcon}
+                      onValueChange={(value) => {
+                        if (value) {
+                          setNewCategoryIcon(value as CategoryIconName)
+                        }
+                      }}
+                    >
+                      <Select.Trigger
+                        aria-label="Ícone da categoria"
+                        className="flex h-7 w-12 shrink-0 items-center justify-center gap-1 rounded-md border border-input bg-input/20 px-2 outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                      >
+                        {(() => {
+                          const SelectedIcon = getIcon(newCategoryIcon)
+                          return <SelectedIcon className="size-4" />
+                        })()}
+                        <Select.Icon>
+                          <IconChevronDown className="size-3" />
+                        </Select.Icon>
+                      </Select.Trigger>
+                      <Select.Portal>
+                        <Select.Positioner
+                          sideOffset={4}
+                          className="z-[60] outline-none"
+                        >
+                          <Select.Popup className="max-h-56 min-w-40 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                            <Select.List>
+                              {CATEGORY_ICON_OPTIONS.map((option) => {
+                                const OptionIcon = getIcon(option.name)
+                                return (
+                                  <Select.Item
+                                    key={option.name}
+                                    value={option.name}
+                                    className="flex min-h-7 cursor-default items-center gap-2 rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                                  >
+                                    <OptionIcon className="size-4" />
+                                    <Select.ItemText>
+                                      {option.label}
+                                    </Select.ItemText>
+                                  </Select.Item>
+                                )
+                              })}
+                            </Select.List>
+                          </Select.Popup>
+                        </Select.Positioner>
+                      </Select.Portal>
+                    </Select.Root>
+                    <Input
+                      autoFocus
+                      aria-label="Nome da categoria"
+                      placeholder="Nome da categoria"
+                      value={newCategoryName}
+                      onChange={(event) =>
+                        setNewCategoryName(event.target.value)
+                      }
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault()
+                          void createCategory()
+                        }
+                      }}
+                    />
+                  </ButtonGroup>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    disabled={isCreatingCategory}
+                    onClick={() => void createCategory()}
+                  >
+                    <IconPlus />
+                    {isCreatingCategory ? "Criando..." : "Criar categoria"}
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </FieldSet>
+          <FieldSet className="grid grid-cols-1 gap-3">
+            <div>
+              <FieldLabel htmlFor="transaction-role">Setor</FieldLabel>
+              <Select.Root
+                value={selectedRoleId}
+                onValueChange={(value) => {
+                  if (value === ADD_ROLE_VALUE) {
+                    setIsRolePopoverOpen(true)
+                    setError(null)
+                    return
+                  }
+                  setSelectedRoleId(value)
+                  setError(null)
+                }}
+              >
+                <Select.Trigger
+                  ref={roleSelectTriggerRef}
+                  id="transaction-role"
+                  className="flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-input/20 px-2 text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                >
+                  <Select.Value className="min-w-0 flex-1 text-left">
+                    {selectedRole ? (
+                      <span className="flex min-w-0 items-center gap-2">
+                        {(() => {
+                          const RoleIcon = getIcon(selectedRole.icon)
+                          return <RoleIcon className="size-4 shrink-0" />
+                        })()}
+                        <span className="truncate">{selectedRole.name}</span>
+                      </span>
+                    ) : isLoadingRoles ? (
+                      "Carregando setores..."
+                    ) : (
+                      "Selecione um setor"
+                    )}
+                  </Select.Value>
+                  <Select.Icon>
+                    <IconChevronDown className="size-3" />
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner
+                    sideOffset={4}
+                    className="z-50 outline-none"
+                  >
+                    <Select.Popup className="min-w-48 rounded-md border bg-popover p-2 text-popover-foreground shadow-md">
+                      <Select.List>
+                        <Select.Item
+                          value={ADD_ROLE_VALUE}
+                          className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                        >
+                          <Select.ItemText>
+                            <span className="flex items-center gap-2">
+                              <IconPlus className="size-3.5" />
+                              Adicionar setor
+                            </span>
+                          </Select.ItemText>
+                        </Select.Item>
+                        {roles.map((role) => {
+                          const RoleIcon = getIcon(role.icon)
+                          return (
+                            <Select.Item
+                              key={role.id}
+                              value={role.id}
+                              className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                            >
+                              <Select.ItemText>
+                                <span className="flex items-center gap-2">
+                                  <RoleIcon className="size-4" />
+                                  {role.name}
+                                </span>
+                              </Select.ItemText>
+                            </Select.Item>
+                          )
+                        })}
+                      </Select.List>
+                      {!roles.length && !isLoadingRoles && (
+                        <p className="px-2 py-1 text-muted-foreground">
+                          Nenhum setor cadastrado
+                        </p>
+                      )}
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select.Root>
+              <Popover
+                open={isRolePopoverOpen}
+                onOpenChange={setIsRolePopoverOpen}
+              >
+                <PopoverContent
+                  anchor={roleSelectTriggerRef}
+                  align="start"
+                  className="w-80"
+                >
+                  <PopoverTitle>Novo setor</PopoverTitle>
+                  <ButtonGroup
+                    aria-label="Ícone e nome do setor"
+                    className="w-full"
+                  >
+                    <Select.Root
+                      value={newRoleIcon}
+                      onValueChange={(value) => {
+                        if (value) {
+                          setNewRoleIcon(value as CategoryIconName)
+                        }
+                      }}
+                    >
+                      <Select.Trigger
+                        aria-label="Ícone do setor"
+                        className="flex h-7 w-12 shrink-0 items-center justify-center gap-1 rounded-md border border-input bg-input/20 px-2 outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                      >
+                        {(() => {
+                          const SelectedIcon = getIcon(newRoleIcon)
+                          return <SelectedIcon className="size-4" />
+                        })()}
+                        <Select.Icon>
+                          <IconChevronDown className="size-3" />
+                        </Select.Icon>
+                      </Select.Trigger>
+                      <Select.Portal>
+                        <Select.Positioner
+                          sideOffset={4}
+                          className="z-[60] outline-none"
+                        >
+                          <Select.Popup className="max-h-56 min-w-40 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                            <Select.List>
+                              {CATEGORY_ICON_OPTIONS.map((option) => {
+                                const OptionIcon = getIcon(option.name)
+                                return (
+                                  <Select.Item
+                                    key={option.name}
+                                    value={option.name}
+                                    className="flex min-h-7 cursor-default items-center gap-2 rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                                  >
+                                    <OptionIcon className="size-4" />
+                                    <Select.ItemText>
+                                      {option.label}
+                                    </Select.ItemText>
+                                  </Select.Item>
+                                )
+                              })}
+                            </Select.List>
+                          </Select.Popup>
+                        </Select.Positioner>
+                      </Select.Portal>
+                    </Select.Root>
+                    <Input
+                      autoFocus
+                      aria-label="Nome do setor"
+                      placeholder="Nome do setor"
+                      value={newRoleName}
+                      onChange={(event) => setNewRoleName(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault()
+                          void createRole()
+                        }
+                      }}
+                    />
+                  </ButtonGroup>
+                  <Button
+                    type="button"
+                    className="w-full"
+                    disabled={isCreatingRole}
+                    onClick={() => void createRole()}
+                  >
+                    <IconPlus />
+                    {isCreatingRole ? "Criando..." : "Criar setor"}
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </FieldSet>
+          {error && (
+            <p role="alert" className="text-destructive">
+              {error}
+            </p>
+          )}
         </FieldGroup>
-      </FieldGroup>
-      <DialogFooter>
-        <Button>
-          <IconDeviceFloppy /> Salvar
-        </Button>
-      </DialogFooter>
+        <DialogFooter className="mt-4">
+          <Button
+            type="submit"
+            disabled={isSavingTransaction || isLoadingCategories}
+          >
+            <IconDeviceFloppy />
+            {isSavingTransaction ? "Salvando..." : "Salvar"}
+          </Button>
+        </DialogFooter>
+      </form>
     </DialogContent>
   )
 }
