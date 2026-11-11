@@ -35,9 +35,9 @@ export class ContactController {
   @Get('all')
   async findAll(
     @UserContext() userId: string,
-    @Query() filters: GetContactsDTO,
-    @Query('page') pageParam?: string,
+    @Query() query: GetContactsDTO,
   ): Promise<ContactPageResponseDTO> {
+    const { page: pageParam, ...filters } = query;
     const page = Number(pageParam ?? 0);
     if (!Number.isInteger(page) || page < 0) {
       throw new BadRequestException('Page must be a non-negative integer');

@@ -35,9 +35,9 @@ export class CompanyController {
   @Get('all')
   async findAll(
     @UserContext() userId: string,
-    @Query() filters: GetCompaniesDTO,
-    @Query('page') pageParam?: string,
+    @Query() query: GetCompaniesDTO,
   ): Promise<CompanyPageResponseDTO> {
+    const { page: pageParam, ...filters } = query;
     const page = Number(pageParam ?? 0);
     if (!Number.isInteger(page) || page < 0) {
       throw new BadRequestException('Page must be a non-negative integer');

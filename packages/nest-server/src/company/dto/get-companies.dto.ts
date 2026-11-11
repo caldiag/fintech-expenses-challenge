@@ -36,4 +36,8 @@ export default class GetCompaniesDTO {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @IsOptional()
+  @IsString()
+  page?: string;
 }

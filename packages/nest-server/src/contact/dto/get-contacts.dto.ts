@@ -36,4 +36,8 @@ export default class GetContactsDTO {
   @IsOptional()
   @IsUUID('4')
   companyId?: string;
+
+  @IsOptional()
+  @IsString()
+  page?: string;
 }
