@@ -25,7 +25,7 @@ export default function RecordTablePagination({
   const isLastPage = currentPage >= pageCount - 1
 
   return (
-    <Pagination className="mx-0 mt-4 w-auto justify-start">
+    <Pagination className="w-auto justify-start">
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious

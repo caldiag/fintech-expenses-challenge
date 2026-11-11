@@ -5,6 +5,7 @@ import {
 } from "@tabler/icons-react"
 import { useRef, useState } from "react"
 import axiosClient from "~/auth/axios-client"
+import { usePaginatedContacts } from "~/hooks/use-paginated-contacts"
 import { Button } from "../ui/button"
 import {
   DialogContent,
@@ -14,12 +15,7 @@ import {
 } from "../ui/dialog"
 import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
-import { Popover, PopoverContent } from "../ui/popover"
-
-type CompanyContact = {
-  id: string
-  name: string
-}
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
 export default function CreateCompanyContent({
   onCreated,
@@ -31,12 +27,24 @@ export default function CreateCompanyContent({
   const [areaCode, setAreaCode] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
-  const [contacts, setContacts] = useState<CompanyContact[]>([])
   const [selectedContactIds, setSelectedContactIds] = useState<string[]>([])
   const [isContactsOpen, setIsContactsOpen] = useState(false)
   const [isSavingCompany, setIsSavingCompany] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const contactsTriggerRef = useRef<HTMLButtonElement>(null)
+  const {
+    contacts,
+    hasError: hasContactLoadError,
+    isLoading: isLoadingContacts,
+    loadNextPage: loadNextContactPage,
+  } = usePaginatedContacts()
+
+  function handleContactsScroll(event: React.UIEvent<HTMLDivElement>) {
+    const { scrollTop, clientHeight, scrollHeight } = event.currentTarget
+    if (scrollHeight - scrollTop - clientHeight < 48) {
+      void loadNextContactPage()
+    }
+  }
 
   function toggleContact(contactId: string) {
     setSelectedContactIds((current) =>
@@ -133,26 +141,33 @@ export default function CreateCompanyContent({
             <div className="sm:col-span-2">
               <FieldLabel htmlFor="company-contacts">Contatos</FieldLabel>
               <Popover open={isContactsOpen} onOpenChange={setIsContactsOpen}>
-                <Button
-                  ref={contactsTriggerRef}
-                  id="company-contacts"
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-between"
-                  aria-haspopup="listbox"
-                  aria-expanded={isContactsOpen}
-                >
-                  <span className="truncate">
-                    {selectedContactIds.length
-                      ? `${selectedContactIds.length} contato(s) selecionado(s)`
-                      : "Selecione os contatos"}
-                  </span>
-                  <IconChevronDown />
-                </Button>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      ref={contactsTriggerRef}
+                      id="company-contacts"
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-between"
+                      aria-haspopup="listbox"
+                      aria-expanded={isContactsOpen}
+                    >
+                      <span className="truncate">
+                        {selectedContactIds.length
+                          ? `${selectedContactIds.length} contato(s) selecionado(s)`
+                          : isLoadingContacts
+                            ? "Carregando contatos..."
+                            : "Selecione os contatos"}
+                      </span>
+                      <IconChevronDown />
+                    </Button>
+                  }
+                />
                 <PopoverContent
                   anchor={contactsTriggerRef}
                   align="start"
-                  className="w-(--anchor-width) gap-1"
+                  className="max-h-64 w-(--anchor-width) gap-1 overflow-y-auto"
+                  onScroll={handleContactsScroll}
                 >
                   {contacts.length ? (
                     contacts.map((contact) => {
@@ -174,7 +189,21 @@ export default function CreateCompanyContent({
                     })
                   ) : (
                     <p className="px-2 py-1 text-muted-foreground">
-                      Nenhum contato disponível
+                      {hasContactLoadError
+                        ? "Não foi possível carregar os contatos."
+                        : isLoadingContacts
+                          ? "Carregando contatos..."
+                          : "Nenhum contato disponível"}
+                    </p>
+                  )}
+                  {contacts.length > 0 && isLoadingContacts && (
+                    <p className="px-2 py-1 text-muted-foreground">
+                      Carregando mais contatos...
+                    </p>
+                  )}
+                  {contacts.length > 0 && hasContactLoadError && (
+                    <p role="alert" className="px-2 py-1 text-destructive">
+                      Não foi possível carregar mais contatos.
                     </p>
                   )}
                 </PopoverContent>
