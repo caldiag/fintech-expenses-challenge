@@ -20,7 +20,17 @@ type ContactFormValues = {
   companyIds: string[]
 }
 
-function mapContactRecord(data: any): ContactFormValues {
+type ContactRecord = {
+  name: string
+  avatarUrl: string | null
+  email: string
+  phone: string | null
+  companies: { id: string }[]
+  createdBy?: { id?: string; role?: { id?: string } | null } | null
+  role?: { id?: string } | null
+}
+
+function mapContactRecord(data: ContactRecord): ContactFormValues {
   return {
     name: data.name,
     avatarUrl: data.avatarUrl ?? "",
@@ -58,7 +68,7 @@ export default function CreateContactContent({
     isLoadingRecord,
     isSavingRecord,
     saveRecord,
-  } = useRecordForm({
+  } = useRecordForm<ContactRecord, ContactFormValues>({
     recordId,
     endpoint: "/contact",
     createEndpoint: "/contact/create",

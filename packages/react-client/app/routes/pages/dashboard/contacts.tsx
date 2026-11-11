@@ -27,10 +27,19 @@ type ContactsResponse = {
   totalPages: number
 }
 
+type ContactTableRow = {
+  id: string
+  name: string
+  email: string
+  phone: string
+  companies: string
+  createdAt: string
+}
+
 export default function Contacts() {
   const navigate = useNavigate()
   const { id: contactId } = useParams()
-  const [tableData, setTableData] = useState<any[]>([])
+  const [tableData, setTableData] = useState<ContactTableRow[]>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [sortDirection, setSortDirection] = useState<SortDirection>(

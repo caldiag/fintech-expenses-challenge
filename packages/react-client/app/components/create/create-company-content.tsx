@@ -20,7 +20,18 @@ type CompanyFormValues = {
   contactIds: string[]
 }
 
-function mapCompanyRecord(data: any): CompanyFormValues {
+type CompanyRecord = {
+  name: string
+  websiteUrl: string
+  areaCode: string | null
+  email: string | null
+  phone: string | null
+  contacts: { id: string }[]
+  createdBy?: { id?: string; role?: { id?: string } | null } | null
+  role?: { id?: string } | null
+}
+
+function mapCompanyRecord(data: CompanyRecord): CompanyFormValues {
   return {
     name: data.name,
     websiteUrl: data.websiteUrl,
@@ -60,7 +71,7 @@ export default function CreateCompanyContent({
     isLoadingRecord,
     isSavingRecord,
     saveRecord,
-  } = useRecordForm({
+  } = useRecordForm<CompanyRecord, CompanyFormValues>({
     recordId,
     endpoint: "/company",
     createEndpoint: "/company/create",

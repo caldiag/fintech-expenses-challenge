@@ -27,10 +27,15 @@ type CompaniesResponse = {
   totalPages: number
 }
 
+type CompanyTableRow = Omit<Company, "email" | "areaCode"> & {
+  email: string
+  areaCode: string
+}
+
 export default function Companies() {
   const navigate = useNavigate()
   const { id: companyId } = useParams()
-  const [tableData, setTableData] = useState<any[]>([])
+  const [tableData, setTableData] = useState<CompanyTableRow[]>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [sortDirection, setSortDirection] = useState<SortDirection>(

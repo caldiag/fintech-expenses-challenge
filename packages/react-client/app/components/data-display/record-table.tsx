@@ -27,12 +27,12 @@ export type {
   RecordTableFilterDefinition,
 } from "./record-table-filters"
 
-type RecordTableProps = {
-  data: any[]
+type RecordTableProps<TItem extends { id: string }> = {
+  data: TItem[]
   columnKeys: {
-    key: string
+    key: keyof TItem & string
     label: string
-    customComponent?: (children: ReactNode, item: any) => ReactNode
+    customComponent?: (children: ReactNode, item: TItem) => ReactNode
     icon: TablerIcon
   }[]
   sortableColumnKeys: string[]
@@ -43,10 +43,10 @@ type RecordTableProps = {
   setColumnSortDirection: (columnKey: string, direction: SortDirection) => void
   filterableColumnKeys?: RecordTableFilterDefinition[]
   onFiltersChange?: (filters: RecordTableFilter[]) => void
-  onRowClick?: (item: any) => void
+  onRowClick?: (item: TItem) => void
 }
 
-export default function RecordTable({
+export default function RecordTable<TItem extends { id: string }>({
   data,
   columnKeys,
   sortableColumnKeys,
@@ -58,7 +58,7 @@ export default function RecordTable({
   filterableColumnKeys = [],
   onFiltersChange,
   onRowClick,
-}: RecordTableProps) {
+}: RecordTableProps<TItem>) {
   return (
     <div>
       <div className="mb-2 flex w-full items-center justify-between gap-1">
@@ -127,11 +127,12 @@ export default function RecordTable({
                 >
                   {columnKeys.map((columnKey) => (
                     <TableCell className="border-r-1" key={columnKey.key}>
-                      {!columnKey.customComponent && data[i][columnKey.key]}
+                      {!columnKey.customComponent &&
+                        (data[i][columnKey.key] as ReactNode)}
                       {columnKey.customComponent && (
                         <>
                           {columnKey.customComponent(
-                            data[i][columnKey.key],
+                            data[i][columnKey.key] as ReactNode,
                             data[i]
                           )}
                         </>

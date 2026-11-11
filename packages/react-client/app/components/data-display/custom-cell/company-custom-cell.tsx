@@ -6,7 +6,7 @@ export default function CompanyCustomCell({
   item,
 }: {
   children: ReactNode
-  item: any
+  item: { websiteUrl: string }
 }) {
   return (
     <div className="flex items-center gap-1">

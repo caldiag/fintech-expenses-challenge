@@ -22,6 +22,17 @@ export type TransactionFormValues = {
   companyId: string
 }
 
+type TransactionRecord = {
+  currency: Currency
+  transactionDirection: TransactionDirection
+  amount: number
+  amountCents: number
+  description: string
+  transactionCategory: { id: string }
+  role: { id: string }
+  company: { id: string }
+}
+
 export const ADD_CATEGORY_VALUE = "__add-category__"
 
 export const CATEGORY_ICON_OPTIONS = [
@@ -38,7 +49,9 @@ export const CATEGORY_ICON_OPTIONS = [
 
 export type CategoryIconName = (typeof CATEGORY_ICON_OPTIONS)[number]["name"]
 
-export function mapTransactionRecord(data: any): TransactionFormValues {
+export function mapTransactionRecord(
+  data: TransactionRecord
+): TransactionFormValues {
   return {
     currency: data.currency,
     transactionDirection: data.transactionDirection,

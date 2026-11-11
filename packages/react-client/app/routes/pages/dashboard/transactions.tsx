@@ -15,10 +15,33 @@ import { formatSmart } from "~/lib/utils/format-date"
 import { getTablerIcon } from "~/lib/utils/tabler-icons"
 import { AppRoutes } from "~/routes"
 
+type TransactionRecord = {
+  id: string
+  amount: number
+  amountCents: number
+  currency: string
+  transactionDirection: TransactionDirection
+  createdAt: string
+  transactionCategory: { name: string; icon: string }
+  role: { id: string; name: string; icon: string }
+  company: { id: string; name: string; websiteUrl: string }
+}
+
+type TransactionTableRow = {
+  id: string
+  transactionDirection: string
+  date: string
+  amount: string
+  category: string
+  categoryIcon: string
+  role: TransactionRecord["role"]
+  company: TransactionRecord["company"]
+}
+
 export default function Transactions() {
   const navigate = useNavigate()
   const { id: transactionId } = useParams()
-  const [tableData, setTableData] = useState<any[]>([])
+  const [tableData, setTableData] = useState<TransactionTableRow[]>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [sortDirection, setSortDirection] = useState<SortDirection>(
@@ -48,14 +71,15 @@ export default function Transactions() {
       }
     })
 
-    axiosClient.get("/transaction/all", { params }).then((d) => {
-      setTableData(
-        d.data.transactions.map((transaction: any) =>
-          parseTableData(transaction)
-        )
+    axiosClient
+      .get<{ transactions: TransactionRecord[]; totalPages: number }>(
+        "/transaction/all",
+        { params }
       )
-      setTotalPages(d.data.totalPages)
-    })
+      .then((d) => {
+        setTableData(d.data.transactions.map(parseTableData))
+        setTotalPages(d.data.totalPages)
+      })
   }, [currentPage, filters, refreshKey])
 
   useEffect(() => {
@@ -178,7 +202,7 @@ export default function Transactions() {
             label: "Categoria",
             icon: getTablerIcon("IconCategory"),
             customComponent: (children, item) => {
-              const CategoryIcon = getTablerIcon(item.category?.icon)
+              const CategoryIcon = getTablerIcon(item.categoryIcon)
               return (
                 <div className="flex items-center gap-1">
                   <CategoryIcon size={12} />
@@ -242,7 +266,7 @@ export default function Transactions() {
   )
 }
 
-function parseTableData(data: any) {
+function parseTableData(data: TransactionRecord): TransactionTableRow {
   return {
     id: data.id,
     transactionDirection:
@@ -255,6 +279,7 @@ function parseTableData(data: any) {
       currency: data.currency,
     }).format(data.amount + data.amountCents / 100),
     category: data.transactionCategory.name,
+    categoryIcon: data.transactionCategory.icon,
     role: data.role,
     company: data.company,
   }
