@@ -1,5 +1,6 @@
 import {
   IconChevronDown,
+  IconFilter,
   IconRefresh,
   IconSearch,
   IconUser,
@@ -21,6 +22,9 @@ export default function NavigationBar() {
     <div className="absolute top-0 left-0 z-1 flex h-15 w-screen items-center justify-end gap-1 p-4">
       <ButtonGroup className="mr-6">
         <Input className="w-full bg-background" />
+        <Button variant="outline">
+          <IconFilter />
+        </Button>
         <Button className="cursor-pointer bg-background" variant="outline">
           <IconSearch />
         </Button>

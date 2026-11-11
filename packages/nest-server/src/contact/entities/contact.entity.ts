@@ -1,15 +1,14 @@
+import type { Relation } from 'typeorm';
 import {
   Column,
   Entity,
   ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import type { Relation } from 'typeorm';
+import { CompanyEntity } from '../../company/entities/company.entity.ts';
 import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
-import { CompanyEntity } from '../../company/entities/company.entity.ts';
 
 @Entity()
 export class ContactEntity extends BaseEntity {
@@ -20,13 +19,13 @@ export class ContactEntity extends BaseEntity {
   name: string;
 
   @Column('varchar', { nullable: true })
-  avatarUrl: string;
+  avatarUrl: string | null;
 
   @Column('varchar')
   email: string;
 
   @Column('varchar', { nullable: true })
-  phone: string;
+  phone: string | null;
 
   @ManyToMany(() => CompanyEntity, (company) => company.contacts, {
     nullable: false,

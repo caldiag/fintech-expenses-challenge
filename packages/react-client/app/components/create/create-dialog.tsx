@@ -5,6 +5,7 @@ import { AppRoutes } from "~/routes"
 import { Button } from "../ui/button"
 import { Dialog, DialogTrigger } from "../ui/dialog"
 import CreateCompanyContent from "./create-company-content"
+import CreateContactContent from "./create-contact-content"
 import CreateTransactionContent from "./create-transaction-content"
 
 export default function CreateDialog() {
@@ -17,6 +18,8 @@ export default function CreateDialog() {
         return <CreateTransactionContent onCreated={() => setOpen(false)} />
       case AppRoutes.Companies:
         return <CreateCompanyContent onCreated={() => setOpen(false)} />
+      case AppRoutes.Contacts:
+        return <CreateContactContent onCreated={() => setOpen(false)} />
       default:
         return null
     }
