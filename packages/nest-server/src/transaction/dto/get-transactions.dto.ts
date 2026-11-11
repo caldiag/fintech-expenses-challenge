@@ -26,10 +26,12 @@ export default class GetTransactionsDTO extends FilteredFindDTO {
   @IsOptional()
   page?: number;
 
+  @Type(() => Number)
   @IsNumber({ allowNaN: false, allowInfinity: false })
   @IsOptional()
   amount?: number;
 
+  @Type(() => Number)
   @IsNumber({ allowNaN: false, allowInfinity: false })
   @IsOptional()
   amountCents?: number;
