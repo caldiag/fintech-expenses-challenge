@@ -84,6 +84,7 @@ export class TransactionService {
       amount: filters.amount,
       amountCents: filters.amountCents,
       currency: filters.currency,
+      company: { id: filters.companyId },
       role: { id: filters.roleId },
     });
     return await queryBuilder.getMany();

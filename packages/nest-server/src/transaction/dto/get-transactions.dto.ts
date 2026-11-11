@@ -47,4 +47,8 @@ export default class GetTransactionsDTO extends FilteredFindDTO {
   @IsEnum(TransactionOrderBy)
   @IsOptional()
   declare orderBy?: TransactionOrderBy;
+
+  @IsUUID('4')
+  @IsOptional()
+  companyId?: string;
 }
