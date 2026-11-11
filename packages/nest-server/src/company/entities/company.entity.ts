@@ -1,15 +1,17 @@
+import type { Relation } from 'typeorm';
 import {
   Column,
   Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import type { Relation } from 'typeorm';
+import { ContactEntity } from '../../contact/entities/contact.entity.ts';
+import { TransactionEntity } from '../../transaction/entities/transaction.entity.ts';
 import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
-import { ContactEntity } from '../../contact/entities/contact.entity.ts';
 
 @Entity()
 export class CompanyEntity extends BaseEntity {
@@ -34,4 +36,7 @@ export class CompanyEntity extends BaseEntity {
   @ManyToMany(() => ContactEntity, (contact) => contact.companies)
   @JoinTable()
   contacts: Relation<ContactEntity[]>;
+
+  @OneToMany(() => TransactionEntity, (transaction) => transaction.company)
+  transactions: Relation<TransactionEntity[]>;
 }

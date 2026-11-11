@@ -7,6 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { CompanyEntity } from '../../company/entities/company.entity.ts';
 import { RoleEntity } from '../../permissions/entities/role.entity.ts';
 import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
@@ -39,6 +40,11 @@ export class TransactionEntity extends BaseEntity {
 
   @ManyToOne(() => RoleEntity, (role) => role.transactions, { nullable: false })
   role: Relation<RoleEntity>;
+
+  @ManyToOne(() => CompanyEntity, (company) => company.transactions, {
+    nullable: false,
+  })
+  company: Relation<CompanyEntity>;
 
   @ManyToOne(() => UserEntity, (user) => user.transactions)
   createdBy: Relation<UserEntity>;
