@@ -16,4 +16,7 @@ export default class CreateTransactionDTO {
 
   @IsString()
   transactionCategoryId: string;
+
+  @IsString()
+  roleId: string;
 }

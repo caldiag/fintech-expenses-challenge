@@ -4,6 +4,7 @@ import {
   Body,
   Controller,
   Get,
+  ForbiddenException,
   Param,
   Post,
   Query,
@@ -31,9 +32,23 @@ export class TransactionController {
     @Body() transaction: CreateTransactionDTO,
     @UserContext() userId: string,
   ): Promise<TransactionEntity> {
+    const { roleId, transactionCategoryId, ...transactionData } = transaction;
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new BadRequestException('User not found');
+
+    const createScope =
+      await this.permissionService.validateUserPermissionScope(
+        userId,
+        PermissionKey.TransactionCreateScope,
+      );
+    if (createScope !== PermissionScope.ALL && user.role?.id !== roleId) {
+      throw new ForbiddenException('Cannot create a transaction for this role');
+    }
+
     return await this.transactionService.createTransaction(
-      transaction,
-      transaction.transactionCategoryId,
+      transactionData,
+      transactionCategoryId,
+      roleId,
       userId,
     );
   }

@@ -21,6 +21,10 @@ export class PermissionsService {
     return await this.roleRepository.findOne({ where: { id } });
   }
 
+  async findAllRoles(): Promise<RoleEntity[]> {
+    return await this.roleRepository.find({ order: { name: 'ASC' } });
+  }
+
   async updateOrCreateRolePermissionSet(
     roleId: string,
     permissionSet: PermissionSet,

@@ -20,13 +20,18 @@ export class TransactionService {
   ) {}
 
   async createTransaction(
-    transaction: Omit<CreateTransactionDTO, 'id'>,
+    transaction: Omit<
+      CreateTransactionDTO,
+      'id' | 'roleId' | 'transactionCategoryId'
+    >,
     transactionCategoryId: string,
+    roleId: string,
     createdByUserId: string,
   ): Promise<TransactionEntity> {
     return await this.transactionRepository.save({
       ...transaction,
       transactionCategory: { id: transactionCategoryId },
+      role: { id: roleId },
       createdBy: { id: createdByUserId },
     });
   }

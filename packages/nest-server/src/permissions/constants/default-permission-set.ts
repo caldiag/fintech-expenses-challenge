@@ -1,5 +1,20 @@
+import type { PermissionSet } from '@app/types';
 import { PermissionScope } from '@app/types';
-import { PermissionSetEntity } from '../entities/permission-set.entity.ts';
+
+export const DEFAULT_ROLE_PERMISSION_SET: PermissionSet = {
+  transactionCreateScope: PermissionScope.OWN,
+  transactionReadScope: PermissionScope.OWN,
+  transactionUpdateScope: PermissionScope.OWN,
+  transactionDeleteScope: PermissionScope.OWN,
+  userCreateScope: PermissionScope.OWN,
+  userReadScope: PermissionScope.OWN,
+  userUpdateScope: PermissionScope.OWN,
+  userDeleteScope: PermissionScope.OWN,
+  roleCreateScope: PermissionScope.OWN,
+  roleReadScope: PermissionScope.OWN,
+  roleUpdateScope: PermissionScope.OWN,
+  roleDeleteScope: PermissionScope.OWN,
+};
 
 export const DEFAULT_ADMIN_PERMISSION_SET = {
   transactionCreateScope: PermissionScope.ALL,
