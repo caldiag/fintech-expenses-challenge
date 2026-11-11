@@ -6,6 +6,7 @@ import {
 } from "@tabler/icons-react"
 import { useLocation } from "react-router"
 import { useAuthContext } from "~/auth/hooks/useAuthContext"
+import { useDashboardRefresh } from "~/hooks/use-dashboard-refresh"
 import { AppRoutes } from "~/routes"
 import CreateDialog from "../create/create-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
@@ -17,6 +18,7 @@ import Title from "../ui/title"
 export default function NavigationBar() {
   const { authContext } = useAuthContext()
   const { pathname } = useLocation()
+  const { refreshView } = useDashboardRefresh()
 
   return (
     <div className="w-fill sticky top-0 z-1 mb-4 flex h-10 items-center justify-between gap-1 border-b-1 p-3 px-4">
@@ -31,7 +33,7 @@ export default function NavigationBar() {
           </Button>
         </ButtonGroup>
         {pathname !== AppRoutes.Dashboard && <CreateDialog />}
-        <Button variant="outline">
+        <Button variant="outline" onClick={refreshView}>
           <IconRefresh /> Atualizar visualização
         </Button>
         <ButtonGroup className="ml-6">

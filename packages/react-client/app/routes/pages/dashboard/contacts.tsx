@@ -2,6 +2,7 @@ import { SortDirection } from "@app/types"
 import { useEffect, useState } from "react"
 import axiosClient from "~/auth/axios-client"
 import RecordTable from "~/components/data-display/record-table"
+import { useDashboardRefresh } from "~/hooks/use-dashboard-refresh"
 import { formatSmart } from "~/lib/utils/format-date"
 import { getTablerIcon } from "~/lib/utils/tabler-icons"
 
@@ -28,6 +29,7 @@ export default function Contacts() {
     SortDirection.DESC
   )
   const [sortBy, setSortBy] = useState<string>("createdAt")
+  const { refreshKey } = useDashboardRefresh()
 
   useEffect(() => {
     axiosClient
@@ -46,7 +48,7 @@ export default function Contacts() {
         )
         setTotalPages(data.totalPages)
       })
-  }, [currentPage])
+  }, [currentPage, refreshKey])
 
   return (
     <div className="w-fill">

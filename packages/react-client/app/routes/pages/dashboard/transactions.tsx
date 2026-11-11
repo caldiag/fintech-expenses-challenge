@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import axiosClient from "~/auth/axios-client"
 import CompanyCustomCell from "~/components/data-display/custom-cell/company-custom-cell"
 import RecordTable from "~/components/data-display/record-table"
-import { getCurrencySymbol } from "~/lib/utils/currency"
+import { useDashboardRefresh } from "~/hooks/use-dashboard-refresh"
 import { formatSmart } from "~/lib/utils/format-date"
 import { getTablerIcon } from "~/lib/utils/tabler-icons"
 
@@ -16,6 +16,7 @@ export default function Transactions() {
     SortDirection.DESC
   )
   const [sortBy, setSortBy] = useState<string>("date")
+  const { refreshKey } = useDashboardRefresh()
 
   useEffect(() => {
     axiosClient
@@ -28,7 +29,7 @@ export default function Transactions() {
         )
         setTotalPages(d.data.totalPages)
       })
-  }, [currentPage])
+  }, [currentPage, refreshKey])
 
   return (
     <div className="w-fill">
@@ -122,8 +123,10 @@ function parseTableData(data: any) {
         ? "Entrada"
         : "Saída",
     date: formatSmart(new Date(data.createdAt)),
-    amount:
-      getCurrencySymbol(data.currency) + data.amount + "," + data.amountCents,
+    amount: new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: data.currency,
+    }).format(data.amount + data.amountCents / 100),
     category: data.transactionCategory.name,
     role: data.role,
     company: data.company.name,

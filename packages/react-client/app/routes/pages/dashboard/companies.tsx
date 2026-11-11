@@ -5,6 +5,7 @@ import axiosClient from "~/auth/axios-client"
 import CompanyCustomCell from "~/components/data-display/custom-cell/company-custom-cell"
 import RecordTable from "~/components/data-display/record-table"
 import { Button } from "~/components/ui/button"
+import { useDashboardRefresh } from "~/hooks/use-dashboard-refresh"
 import { getTablerIcon } from "~/lib/utils/tabler-icons"
 
 type Company = {
@@ -27,6 +28,7 @@ export default function Companies() {
     SortDirection.DESC
   )
   const [sortBy, setSortBy] = useState<string>("date")
+  const { refreshKey } = useDashboardRefresh()
 
   useEffect(() => {
     axiosClient
@@ -43,7 +45,7 @@ export default function Companies() {
         )
         setTotalPages(data.totalPages)
       })
-  }, [currentPage])
+  }, [currentPage, refreshKey])
 
   return (
     <div className="w-fill">
