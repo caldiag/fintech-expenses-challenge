@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -9,13 +8,13 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from './auth.service.ts';
-import { AccountCredentialsDTO as AccountCredentialsDTO } from './dto/account-credentials.dto.ts';
-import { Public } from './guard/public.decorator.ts';
-import { CreateUserDTO } from '../user/dto/user.dto.ts';
 import type { Response } from 'express';
-import { UserContext } from './guard/context.decorator.ts';
+import { CreateUserDTO } from '../user/dto/user.dto.ts';
 import { UserService } from '../user/user.service.ts';
+import { AuthService } from './auth.service.ts';
+import { AccountCredentialsDTO } from './dto/account-credentials.dto.ts';
+import { UserContext } from './guard/context.decorator.ts';
+import { Public } from './guard/public.decorator.ts';
 
 @Controller('login')
 export class AuthController {
@@ -80,9 +79,8 @@ export class AuthController {
   @Get('me')
   async me(
     @Req() req: Request & { headers: any },
-    @UserContext() userId: string | null,
+    @UserContext() userId: string,
   ) {
-    if (!userId) throw new BadRequestException();
     return await this.userService.getUserById(userId);
   }
 }

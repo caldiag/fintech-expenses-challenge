@@ -1,7 +1,13 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
-export const UserContext = createParamDecorator(
+export const UserContext = createParamDecorator<string>(
   (data: unknown, ctx: ExecutionContext) => {
-    return ctx.switchToHttp().getRequest().userId;
+    const id = ctx.switchToHttp().getRequest().userId;
+    if (!id) throw new InternalServerErrorException('Something went wrong');
+    return id;
   },
 );

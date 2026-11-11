@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
 import CreateTransactionCategoryDTO from './dto/create-transaction-category.dto.ts';
 import CreateTransactionDTO from './dto/create-transaction.dto.ts';
@@ -12,11 +12,8 @@ export class TransactionController {
   @Post('create')
   async createTransaction(
     @Body() transaction: CreateTransactionDTO,
-    @UserContext() userId: string | null,
+    @UserContext() userId: string,
   ): Promise<TransactionEntity> {
-    if (!userId) {
-      throw new ForbiddenException('User not found');
-    }
     return await this.transactionService.createTransaction(
       transaction,
       transaction.transactionCategoryId,
@@ -27,11 +24,8 @@ export class TransactionController {
   @Post('category/create')
   async createTransactionCategory(
     @Body() transaction: CreateTransactionCategoryDTO,
-    @UserContext() userId: string | null,
+    @UserContext() userId: string,
   ) {
-    if (!userId) {
-      throw new ForbiddenException('User not found');
-    }
     return await this.transactionService.createTransactionCategory(
       transaction,
       userId,
