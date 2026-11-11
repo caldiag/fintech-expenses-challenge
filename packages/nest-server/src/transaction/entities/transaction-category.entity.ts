@@ -15,7 +15,7 @@ export class TransactionCategoryEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('varchar')
+  @Column('varchar', { unique: true })
   name: string;
 
   @Column('varchar')
