@@ -1,16 +1,16 @@
 import { PermissionScope } from '@app/types';
+import type { Relation } from 'typeorm';
 import {
   Check,
   Column,
   Entity,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
-  JoinColumn,
 } from 'typeorm';
-import type { Relation } from 'typeorm';
 import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
-import { RoleEntity } from './role.entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
+import { RoleEntity } from './role.entity.ts';
 
 @Entity()
 //a permission either applies to one user or one role, never both and never neither
@@ -50,6 +50,64 @@ export class PermissionSetEntity extends BaseEntity {
     default: PermissionScope.OWN,
   })
   transactionDeleteScope: PermissionScope;
+
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  companyCreateScope: PermissionScope;
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  companyReadScope: PermissionScope;
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  companyUpdateScope: PermissionScope;
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  companyDeleteScope: PermissionScope;
+
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  contactCreateScope: PermissionScope;
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  contactReadScope: PermissionScope;
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  contactUpdateScope: PermissionScope;
+  @Column({
+    type: 'enum',
+    enum: PermissionScope,
+    enumName: 'permission_scope',
+    default: PermissionScope.OWN,
+  })
+  contactDeleteScope: PermissionScope;
 
   @Column({
     type: 'enum',

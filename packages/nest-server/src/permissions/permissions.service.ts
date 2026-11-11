@@ -2,6 +2,7 @@ import { PermissionKey, PermissionScope, PermissionSet } from '@app/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import type { TransactionEntity } from '../transaction/entities/transaction.entity.ts';
 import { UserService } from '../user/user.service.ts';
 import { PermissionSetEntity } from './entities/permission-set.entity.ts';
 import { RoleEntity } from './entities/role.entity.ts';
@@ -86,5 +87,18 @@ export class PermissionsService {
 
     //least privilege fallback
     return PermissionScope.OWN;
+  }
+
+  canAccessTransaction(
+    scope: PermissionScope,
+    user: Awaited<ReturnType<UserService['getUserById']>>,
+    transaction: TransactionEntity,
+  ): boolean {
+    if (!user) return false;
+    if (scope === PermissionScope.ALL) return true;
+    if (scope === PermissionScope.ROLE) {
+      return Boolean(user.role && transaction.role.id === user.role.id);
+    }
+    return transaction.createdBy?.id === user.id;
   }
 }

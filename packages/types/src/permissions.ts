@@ -10,6 +10,16 @@ export enum PermissionKey {
   TransactionUpdateScope = "transactionUpdateScope",
   TransactionDeleteScope = "transactionDeleteScope",
 
+  CompanyCreateScope = "companyCreateScope",
+  CompanyReadScope = "companyReadScope",
+  CompanyUpdateScope = "companyUpdateScope",
+  CompanyDeleteScope = "companyDeleteScope",
+
+  ContactCreateScope = "contactCreateScope",
+  ContactReadScope = "contactReadScope",
+  ContactUpdateScope = "contactUpdateScope",
+  ContactDeleteScope = "contactDeleteScope",
+
   RoleCreateScope = "roleCreateScope",
   RoleReadScope = "roleReadScope",
   RoleUpdateScope = "roleUpdateScope",
@@ -26,6 +36,16 @@ export type PermissionSet = {
   transactionReadScope: PermissionScope;
   transactionUpdateScope: PermissionScope;
   transactionDeleteScope: PermissionScope;
+
+  companyCreateScope: PermissionScope;
+  companyReadScope: PermissionScope;
+  companyUpdateScope: PermissionScope;
+  companyDeleteScope: PermissionScope;
+
+  contactCreateScope: PermissionScope;
+  contactReadScope: PermissionScope;
+  contactUpdateScope: PermissionScope;
+  contactDeleteScope: PermissionScope;
 
   roleCreateScope: PermissionScope;
   roleReadScope: PermissionScope;

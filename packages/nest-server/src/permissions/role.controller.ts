@@ -8,10 +8,14 @@ import {
   Post,
 } from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
+import {
+  toStrictResponseDto,
+  toStrictResponseDtoArray,
+} from '../typeorm/dto/strict-response.dto.ts';
 import { UserService } from '../user/user.service.ts';
 import { DEFAULT_ROLE_PERMISSION_SET } from './constants/default-permission-set.ts';
 import CreateRoleDTO from './dto/create-role.dto.ts';
-import { RoleEntity } from './entities/role.entity.ts';
+import { RoleResponseDTO } from './dto/role-response.dto.ts';
 import { PermissionsService } from './permissions.service.ts';
 
 @Controller('role')
@@ -22,26 +26,31 @@ export class RoleController {
   ) {}
 
   @Get('all')
-  async findAll(@UserContext() userId: string): Promise<RoleEntity[]> {
+  async findAll(@UserContext() userId: string): Promise<RoleResponseDTO[]> {
     const readScope = await this.permissionsService.validateUserPermissionScope(
       userId,
       PermissionKey.RoleReadScope,
     );
 
     if (readScope === PermissionScope.ALL) {
-      return await this.permissionsService.findAllRoles();
+      return toStrictResponseDtoArray(
+        RoleResponseDTO,
+        await this.permissionsService.findAllRoles(),
+      );
     }
 
     const user = await this.userService.getUserById(userId);
     if (!user) return [];
-    return user.role ? [user.role] : [];
+    return user.role
+      ? toStrictResponseDtoArray(RoleResponseDTO, [user.role])
+      : [];
   }
 
   @Post('create')
   async create(
     @Body() role: CreateRoleDTO,
     @UserContext() userId: string,
-  ): Promise<RoleEntity> {
+  ): Promise<RoleResponseDTO> {
     const createScope =
       await this.permissionsService.validateUserPermissionScope(
         userId,
@@ -60,6 +69,6 @@ export class RoleController {
       throw new InternalServerErrorException('Failed to create role');
     }
 
-    return createdRole;
+    return toStrictResponseDto(RoleResponseDTO, createdRole);
   }
 }
