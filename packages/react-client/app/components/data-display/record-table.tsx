@@ -16,7 +16,7 @@ type RecordTableProps = {
   columnKeys: {
     key: string
     label: string
-    customComponent?: (children: ReactNode) => ReactNode
+    customComponent?: (children: ReactNode, item: any) => ReactNode
   }[]
   sortableColumnKeys: string[]
   tableCaption: string
@@ -48,7 +48,12 @@ export default function RecordTable({
                   <TableCell key={columnKey.key}>
                     {!columnKey.customComponent && data[i][columnKey.key]}
                     {columnKey.customComponent && (
-                      <>{columnKey.customComponent(data[i][columnKey.key])}</>
+                      <>
+                        {columnKey.customComponent(
+                          data[i][columnKey.key],
+                          data[i]
+                        )}
+                      </>
                     )}
                   </TableCell>
                 ))}
