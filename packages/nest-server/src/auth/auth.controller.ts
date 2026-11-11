@@ -9,6 +9,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { toStrictResponseDto } from '../typeorm/dto/strict-response.dto.ts';
+import { UserResponseDTO } from '../user/dto/user-response.dto.ts';
 import { CreateUserDTO } from '../user/dto/user.dto.ts';
 import { UserService } from '../user/user.service.ts';
 import { AuthService } from './auth.service.ts';
@@ -80,7 +82,13 @@ export class AuthController {
   async me(
     @Req() req: Request & { headers: any },
     @UserContext() userId: string,
-  ) {
-    return await this.userService.getUserById(userId);
+  ): Promise<UserResponseDTO | null> {
+    const user = await this.userService.getUserById(userId);
+    if (!user) return null;
+
+    return toStrictResponseDto(UserResponseDTO, {
+      ...user,
+      permissionSet: user.permissionSet ?? user.role?.permissionSet,
+    });
   }
 }
