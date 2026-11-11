@@ -21,14 +21,17 @@ export class CompanyEntity extends BaseEntity {
   @Column('varchar')
   name: string;
 
-  @Column('varchar', { nullable: true })
-  areaCode: string;
+  @Column('varchar')
+  websiteUrl: string;
 
   @Column('varchar', { nullable: true })
-  email: string;
+  areaCode: string | null;
 
   @Column('varchar', { nullable: true })
-  phone: string;
+  email: string | null;
+
+  @Column('varchar', { nullable: true })
+  phone: string | null;
 
   @ManyToOne(() => UserEntity)
   createdBy: Relation<UserEntity>;

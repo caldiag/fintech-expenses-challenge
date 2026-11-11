@@ -16,7 +16,7 @@ export default function CreateDialog() {
       case AppRoutes.Transactions:
         return <CreateTransactionContent onCreated={() => setOpen(false)} />
       case AppRoutes.Companies:
-        return <CreateCompanyContent />
+        return <CreateCompanyContent onCreated={() => setOpen(false)} />
       default:
         return null
     }
