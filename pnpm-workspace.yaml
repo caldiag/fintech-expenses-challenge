@@ -2,3 +2,5 @@ packages:
   - "packages/*"
 allowBuilds:
   argon2: false
+  esbuild: true
+  msw: false
