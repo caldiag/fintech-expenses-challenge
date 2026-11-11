@@ -1,23 +1,23 @@
+import { IconArrowRight } from "@tabler/icons-react"
 import axios from "axios"
 import { useState } from "react"
 import { useNavigate } from "react-router"
+import { Button } from "~/components/ui/button"
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "~/components/ui/card"
-import { FieldSet, FieldGroup, Field, FieldLabel } from "~/components/ui/field"
-import { Button } from "~/components/ui/button"
+import { Field, FieldGroup, FieldLabel, FieldSet } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
-import { serverUrl } from "~/lib/server-url"
 import { Separator } from "~/components/ui/separator"
-import { IconArrowRight } from "@tabler/icons-react"
 import { Spinner } from "~/components/ui/spinner"
 import { toast } from "~/components/ui/toast"
+import { serverUrl } from "~/lib/server-url"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -77,7 +77,7 @@ export default function Login() {
           alt="background"
         />
       </div>
-      <Card className="z-2 h-screen min-w-105">
+      <Card className="z-2 h-screen min-w-105 rounded-none">
         <CardHeader>
           <CardTitle>Login</CardTitle>
           <CardDescription>Acesse sua conta</CardDescription>

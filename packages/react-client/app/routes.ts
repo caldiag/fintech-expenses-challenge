@@ -9,3 +9,12 @@ export default [
     route("contacts", "routes/pages/dashboard/contacts.tsx"),
   ]),
 ] satisfies RouteConfig
+
+export enum AppRoutes {
+  Home = "/",
+  Login = "/login",
+  Dashboard = "/dashboard",
+  Transactions = "/dashboard/transactions",
+  Companies = "/dashboard/companies",
+  Contacts = "/dashboard/contacts",
+}

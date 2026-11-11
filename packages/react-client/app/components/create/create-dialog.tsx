@@ -1,5 +1,6 @@
 import { IconPlus } from "@tabler/icons-react"
 import { useLocation } from "react-router"
+import { AppRoutes } from "~/routes"
 import { Button } from "../ui/button"
 import { Dialog, DialogTrigger } from "../ui/dialog"
 import CreateCompanyContent from "./create-company-content"
@@ -10,9 +11,9 @@ export default function CreateDialog() {
 
   function getContent() {
     switch (pathname) {
-      case "/dashboard/transactions":
+      case AppRoutes.Transactions:
         return <CreateTransactionContent />
-      case "/dashboard/companies":
+      case AppRoutes.Companies:
         return <CreateCompanyContent />
       default:
         return null

@@ -1,8 +1,9 @@
+import type { AxiosResponse } from "axios"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router"
+import { AppRoutes } from "~/routes"
 import type { AuthContext } from "~/types/AuthContext"
 import axiosClient from "../axios-client"
-import type { AxiosResponse } from "axios"
-import { useNavigate } from "react-router"
 
 export function useAuthContext() {
   const [authContext, setAuthContext] = useState<AuthContext>()
@@ -19,7 +20,7 @@ export function useAuthContext() {
         setAuthContext(d.data)
       })
       .catch(() => {
-        navigate("/login")
+        navigate(AppRoutes.Login)
       })
   }
 

@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from "react-router"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
 import { Separator } from "~/components/ui/separator"
+import { AppRoutes } from "~/routes"
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty"
 
 export default function Drawer() {
@@ -19,10 +20,12 @@ export default function Drawer() {
     <Card className="z-2 h-screen max-w-65 rounded-none bg-sidebar">
       <CardContent>
         <Button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate(AppRoutes.Dashboard)}
           className={
             buttonStyling +
-            (pathname === "/dashboard" ? " bg-sidebar-border opacity-100" : "")
+            (pathname === AppRoutes.Dashboard
+              ? " bg-sidebar-border opacity-100"
+              : "")
           }
           size="lg"
           variant="ghost"
@@ -30,10 +33,10 @@ export default function Drawer() {
           <IconHome /> Início
         </Button>
         <Button
-          onClick={() => navigate("/dashboard/transactions")}
+          onClick={() => navigate(AppRoutes.Transactions)}
           className={
             buttonStyling +
-            (pathname === "/dashboard/transactions"
+            (pathname === AppRoutes.Transactions
               ? " bg-sidebar-border opacity-100"
               : "")
           }
@@ -43,10 +46,10 @@ export default function Drawer() {
           <IconCurrencyDollar /> Transações
         </Button>
         <Button
-          onClick={() => navigate("/dashboard/companies")}
+          onClick={() => navigate(AppRoutes.Companies)}
           className={
             buttonStyling +
-            (pathname === "/dashboard/companies"
+            (pathname === AppRoutes.Companies
               ? " bg-sidebar-border opacity-100"
               : "")
           }
@@ -56,10 +59,10 @@ export default function Drawer() {
           <IconBuilding /> Empresas
         </Button>
         <Button
-          onClick={() => navigate("/dashboard/contacts")}
+          onClick={() => navigate(AppRoutes.Contacts)}
           className={
             buttonStyling +
-            (pathname === "/dashboard/contacts"
+            (pathname === AppRoutes.Contacts
               ? " bg-sidebar-border opacity-100"
               : "")
           }

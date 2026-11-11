@@ -6,6 +6,7 @@ import {
 } from "@tabler/icons-react"
 import { useLocation } from "react-router"
 import { useAuthContext } from "~/auth/hooks/useAuthContext"
+import { AppRoutes } from "~/routes"
 import CreateDialog from "../create/create-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
@@ -24,7 +25,7 @@ export default function NavigationBar() {
           <IconSearch />
         </Button>
       </ButtonGroup>
-      {pathname !== "/dashboard" && <CreateDialog />}
+      {pathname !== AppRoutes.Dashboard && <CreateDialog />}
       <Button variant="outline">
         <IconRefresh /> Atualizar visualização
       </Button>
