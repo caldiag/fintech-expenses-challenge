@@ -20,7 +20,7 @@ export function useAuthContext() {
       .then((d: AxiosResponse<AuthContext>) => {
         setAuthContext(d.data)
         if (pathname === AppRoutes.Login || pathname === AppRoutes.Home) {
-          navigate(AppRoutes.Dashboard)
+          navigate(AppRoutes.Summary)
         }
       })
       .catch(() => {
