@@ -1,14 +1,18 @@
+import { PermissionKey } from "@app/types"
 import {
   IconBuilding,
   IconCheck,
   IconChevronDown,
   IconDeviceFloppy,
 } from "@tabler/icons-react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useForm } from "react-hook-form"
 import axiosClient from "~/auth/axios-client"
+import { useAuthContext } from "~/auth/hooks/useAuthContext"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { toast } from "~/components/ui/toast"
 import { usePaginatedCompanies } from "~/hooks/use-paginated-companies"
+import { hasRecordScopeAccess } from "~/lib/utils/record-permissions"
 import { Button } from "../ui/button"
 import {
   DialogContent,
@@ -20,16 +24,35 @@ import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
+type ContactFormValues = {
+  name: string
+  avatarUrl: string
+  email: string
+  phone: string
+  companyIds: string[]
+}
+
 export default function CreateContactContent({
   onCreated,
+  recordId,
 }: {
   onCreated: () => void
+  recordId?: string
 }) {
-  const [name, setName] = useState("")
-  const [avatarUrl, setAvatarUrl] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [selectedCompanyIds, setSelectedCompanyIds] = useState<string[]>([])
+  const { authContext } = useAuthContext()
+  const { handleSubmit, register, reset, setValue, watch } =
+    useForm<ContactFormValues>({
+      defaultValues: {
+        name: "",
+        avatarUrl: "",
+        email: "",
+        phone: "",
+        companyIds: [],
+      },
+    })
+  const selectedCompanyIds = watch("companyIds")
+  const [editingRecord, setEditingRecord] = useState<any>()
+  const [isLoadingRecord, setIsLoadingRecord] = useState(Boolean(recordId))
   const [isCompaniesOpen, setIsCompaniesOpen] = useState(false)
   const [isSavingContact, setIsSavingContact] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,12 +63,60 @@ export default function CreateContactContent({
     isLoading: isLoadingCompanies,
     loadNextPage: loadNextCompanyPage,
   } = usePaginatedCompanies()
+  const canEdit =
+    !recordId ||
+    hasRecordScopeAccess(
+      authContext?.permissionSet[PermissionKey.ContactUpdateScope],
+      authContext,
+      editingRecord
+    )
+  const canDelete =
+    Boolean(recordId) &&
+    hasRecordScopeAccess(
+      authContext?.permissionSet[PermissionKey.ContactDeleteScope],
+      authContext,
+      editingRecord
+    )
+
+  useEffect(() => {
+    if (!recordId) return
+    let active = true
+    setEditingRecord(undefined)
+    setError(null)
+    setIsLoadingRecord(true)
+    axiosClient
+      .get(`/contact/${recordId}`)
+      .then(({ data }) => {
+        if (!active) return
+        setEditingRecord(data)
+        reset({
+          name: data.name,
+          avatarUrl: data.avatarUrl ?? "",
+          email: data.email,
+          phone: data.phone ?? "",
+          companyIds: data.companies.map(
+            (company: { id: string }) => company.id
+          ),
+        })
+      })
+      .catch(() => {
+        if (active) setError("Não foi possível carregar o contato.")
+      })
+      .finally(() => {
+        if (active) setIsLoadingRecord(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [recordId, reset])
 
   function toggleCompany(companyId: string) {
-    setSelectedCompanyIds((current) =>
-      current.includes(companyId)
-        ? current.filter((id) => id !== companyId)
-        : [...current, companyId]
+    setValue(
+      "companyIds",
+      selectedCompanyIds.includes(companyId)
+        ? selectedCompanyIds.filter((id) => id !== companyId)
+        : [...selectedCompanyIds, companyId],
+      { shouldDirty: true }
     )
   }
 
@@ -56,22 +127,28 @@ export default function CreateContactContent({
     }
   }
 
-  async function submitContact(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function submitContact(values: ContactFormValues) {
     setError(null)
     setIsSavingContact(true)
     try {
-      await axiosClient.post("/contact/create", {
-        name: name.trim(),
-        avatarUrl: avatarUrl.trim() || null,
-        email: email.trim(),
-        phone: phone.trim() || null,
-        companyIds: selectedCompanyIds,
-      })
+      const payload = {
+        name: values.name.trim(),
+        avatarUrl: values.avatarUrl.trim() || null,
+        email: values.email.trim(),
+        phone: values.phone.trim() || null,
+        companyIds: values.companyIds,
+      }
+      if (recordId) {
+        await axiosClient.patch(`/contact/${recordId}`, payload)
+      } else {
+        await axiosClient.post("/contact/create", payload)
+      }
       toast.add({
         type: "success",
         title: "Sucesso",
-        description: "Contato criado com sucesso.",
+        description: recordId
+          ? "Contato atualizado com sucesso."
+          : "Contato criado com sucesso.",
       })
       onCreated()
     } catch {
@@ -81,43 +158,60 @@ export default function CreateContactContent({
     }
   }
 
+  async function deleteContact() {
+    if (!recordId || !window.confirm("Excluir este contato?")) return
+    try {
+      await axiosClient.delete(`/contact/${recordId}`)
+      toast.add({
+        type: "success",
+        title: "Sucesso",
+        description: "Contato excluído com sucesso.",
+      })
+      onCreated()
+    } catch {
+      setError("Não foi possível excluir o contato.")
+    }
+  }
+
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Novo contato</DialogTitle>
+        <DialogTitle>
+          {recordId ? "Editar contato" : "Novo contato"}
+        </DialogTitle>
       </DialogHeader>
-      <form onSubmit={submitContact}>
+      <form onSubmit={handleSubmit(submitContact)}>
         <FieldGroup>
           <FieldSet className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <FieldLabel htmlFor="contact-name">Nome</FieldLabel>
               <Input
+                {...register("name", { required: true })}
                 id="contact-name"
                 placeholder="Nome do contato"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
+                disabled={!canEdit}
                 required
               />
             </div>
             <div>
               <FieldLabel htmlFor="contact-email">E-mail</FieldLabel>
               <Input
+                {...register("email", { required: true })}
                 id="contact-email"
                 type="email"
                 placeholder="contato@exemplo.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                disabled={!canEdit}
                 required
               />
             </div>
             <div>
               <FieldLabel htmlFor="contact-phone">Telefone</FieldLabel>
               <Input
+                {...register("phone")}
                 id="contact-phone"
                 type="tel"
                 placeholder="(11) 99999-9999"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
+                disabled={!canEdit}
               />
             </div>
             <div className="sm:col-span-2">
@@ -125,11 +219,11 @@ export default function CreateContactContent({
                 URL do avatar
               </FieldLabel>
               <Input
+                {...register("avatarUrl")}
                 id="contact-avatar-url"
                 type="url"
                 placeholder="https://exemplo.com/avatar.jpg"
-                value={avatarUrl}
-                onChange={(event) => setAvatarUrl(event.target.value)}
+                disabled={!canEdit}
               />
             </div>
             <div className="sm:col-span-2">
@@ -145,6 +239,7 @@ export default function CreateContactContent({
                       className="w-full justify-between"
                       aria-haspopup="listbox"
                       aria-expanded={isCompaniesOpen}
+                      disabled={!canEdit}
                     >
                       <span className="truncate">
                         {selectedCompanyIds.length
@@ -174,6 +269,7 @@ export default function CreateContactContent({
                           className="w-full justify-between"
                           role="option"
                           aria-selected={isSelected}
+                          disabled={!canEdit}
                           onClick={() => toggleCompany(company.id)}
                         >
                           <span className="flex min-w-0 items-center gap-2">
@@ -228,10 +324,22 @@ export default function CreateContactContent({
           )}
         </FieldGroup>
         <DialogFooter className="mt-4">
-          <Button type="submit" disabled={isSavingContact}>
-            <IconDeviceFloppy />
-            {isSavingContact ? "Salvando..." : "Salvar"}
-          </Button>
+          {isLoadingRecord && <span>Carregando contato...</span>}
+          {canDelete && (
+            <Button type="button" variant="destructive" onClick={deleteContact}>
+              Excluir
+            </Button>
+          )}
+          {canEdit && (
+            <Button type="submit" disabled={isSavingContact || isLoadingRecord}>
+              <IconDeviceFloppy />
+              {isSavingContact
+                ? "Salvando..."
+                : recordId
+                  ? "Salvar alterações"
+                  : "Salvar"}
+            </Button>
+          )}
         </DialogFooter>
       </form>
     </DialogContent>

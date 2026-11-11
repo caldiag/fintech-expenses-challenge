@@ -136,7 +136,7 @@ export class TransactionController {
     const { page = 0, ...filters } = query;
 
     if (readScope === PermissionScope.ROLE) {
-      if (!user.role) throw new ForbiddenException('A role is required');
+      if (!user.role) throw new BadRequestException('A role is required');
       filters.roleId = user.role.id;
     }
 
