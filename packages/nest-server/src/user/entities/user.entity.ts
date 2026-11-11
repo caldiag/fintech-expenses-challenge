@@ -1,3 +1,4 @@
+import type { Relation } from 'typeorm';
 import {
   Column,
   Entity,
@@ -6,11 +7,10 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import type { Relation } from 'typeorm';
-import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
-import { TransactionEntity } from '../../transaction/entities/transaction.entity.ts';
-import { RoleEntity } from '../../permissions/entities/role.entity.ts';
 import { PermissionSetEntity } from '../../permissions/entities/permission-set.entity.ts';
+import { RoleEntity } from '../../permissions/entities/role.entity.ts';
+import { TransactionEntity } from '../../transaction/entities/transaction.entity.ts';
+import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -33,7 +33,7 @@ export class UserEntity extends BaseEntity {
   transactions: Relation<TransactionEntity[]>;
 
   @ManyToOne(() => RoleEntity, (role) => role.users, { nullable: true })
-  role: Relation<RoleEntity>;
+  role: Relation<RoleEntity> | null;
 
   @OneToOne(() => PermissionSetEntity, (permissionSet) => permissionSet.user)
   permissionSet: Relation<PermissionSetEntity> | null;
