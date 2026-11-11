@@ -1,39 +1,78 @@
 import type { SortDirection } from "@app/types"
+import { IconCircleDotted } from "@tabler/icons-react"
+import type { ReactNode } from "react"
+import CreateDialog from "../create/create-dialog"
+import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "../ui/table"
 
-export default function RecordTable(
-  data: any[],
-  columnKeys: string[],
-  sortableColumnKeys: string[],
-  tableCaption: string,
-  setColumnOrderDirection: (columnKey: string, direction: SortDirection) => void
-) {
+type RecordTableProps = {
+  data: any[]
+  columnKeys: {
+    key: string
+    label: string
+    customComponent?: (children: ReactNode) => ReactNode
+  }[]
+  sortableColumnKeys: string[]
+  tableCaption: string
+  setColumnSortDirection: (columnKey: string, direction: SortDirection) => void
+}
+
+export default function RecordTable({
+  data,
+  columnKeys,
+  sortableColumnKeys,
+  tableCaption,
+  setColumnSortDirection,
+}: RecordTableProps) {
   return (
-    <Table>
-      <TableCaption>{tableCaption}</TableCaption>
-      <TableHeader>
-        {sortableColumnKeys.map((columnKey) => (
-          <TableHeader key={columnKey}>{columnKey}</TableHeader>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {data.map((row) => {
-          return (
+    <div className="overflow-hidden rounded-sm border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {columnKeys.map((columnKey) => (
+              <TableHead key={columnKey.key}>{columnKey.label}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((row, i) => {
+            return (
+              <TableRow>
+                {columnKeys.map((columnKey) => (
+                  <TableCell key={columnKey.key}>
+                    {!columnKey.customComponent && data[i][columnKey.key]}
+                    {columnKey.customComponent && (
+                      <>{columnKey.customComponent(data[i][columnKey.key])}</>
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )
+          })}
+          {!data.length && (
             <TableRow>
-              {columnKeys.map((columnKey) => (
-                <TableCell key={columnKey}>{row[columnKey]}</TableCell>
-              ))}
+              <TableCell colSpan={columnKeys.length} className="text-center">
+                <Empty>
+                  <EmptyMedia>
+                    <IconCircleDotted />
+                  </EmptyMedia>
+                  <EmptyTitle>Ainda não há nada aqui</EmptyTitle>
+                  <EmptyDescription>
+                    <CreateDialog />
+                  </EmptyDescription>
+                </Empty>
+              </TableCell>
             </TableRow>
-          )
-        })}
-      </TableBody>
-    </Table>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
