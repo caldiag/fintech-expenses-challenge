@@ -31,7 +31,12 @@ export default function Drawer() {
         </Button>
         <Button
           onClick={() => navigate("/dashboard/transactions")}
-          className={buttonStyling}
+          className={
+            buttonStyling +
+            (pathname === "/dashboard/transactions"
+              ? " bg-sidebar-border opacity-100"
+              : "")
+          }
           size="lg"
           variant="ghost"
         >
@@ -39,7 +44,12 @@ export default function Drawer() {
         </Button>
         <Button
           onClick={() => navigate("/dashboard/companies")}
-          className={buttonStyling}
+          className={
+            buttonStyling +
+            (pathname === "/dashboard/companies"
+              ? " bg-sidebar-border opacity-100"
+              : "")
+          }
           size="lg"
           variant="ghost"
         >
@@ -47,7 +57,12 @@ export default function Drawer() {
         </Button>
         <Button
           onClick={() => navigate("/dashboard/contacts")}
-          className={buttonStyling}
+          className={
+            buttonStyling +
+            (pathname === "/dashboard/contacts"
+              ? " bg-sidebar-border opacity-100"
+              : "")
+          }
           size="lg"
           variant="ghost"
         >
