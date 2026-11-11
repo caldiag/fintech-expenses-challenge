@@ -1,7 +1,12 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from './public.decorator.ts';
 import { AuthService } from '../auth.service.ts';
+import { IS_PUBLIC_KEY } from './public.decorator.ts';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,11 +23,14 @@ export class AuthGuard implements CanActivate {
 
     const req = context.switchToHttp().getRequest();
     const token = req.cookies?.authorization;
-    req.userId = this.authService.decodeToken(token).id;
-    if (token) {
-      this.authService.verifyToken(token);
+    if (!token) throw new UnauthorizedException();
+
+    try {
+      const payload = this.authService.verifyToken(token);
+      req.userId = payload.id;
       return true;
+    } catch {
+      throw new UnauthorizedException();
     }
-    return false;
   }
 }
