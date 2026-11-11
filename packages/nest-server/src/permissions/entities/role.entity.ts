@@ -25,8 +25,8 @@ export class RoleEntity extends BaseEntity {
   @OneToMany(() => UserEntity, (user) => user.role)
   users: Relation<UserEntity[]>;
 
-  @OneToMany(() => TransactionEntity, (user) => user.role)
-  transactions: Relation<UserEntity[]>;
+  @OneToMany(() => TransactionEntity, (transaction) => transaction.role)
+  transactions: Relation<TransactionEntity[]>;
 
   @OneToOne(() => PermissionSetEntity, (permissionSet) => permissionSet.role, {
     nullable: false,
