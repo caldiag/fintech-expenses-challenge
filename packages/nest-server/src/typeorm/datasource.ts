@@ -2,6 +2,13 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { DataSource } from 'typeorm';
+import { CompanyEntity } from '../company/entities/company.entity.ts';
+import { ContactEntity } from '../contact/entities/contact.entity.ts';
+import { PermissionSetEntity } from '../permissions/entities/permission-set.entity.ts';
+import { RoleEntity } from '../permissions/entities/role.entity.ts';
+import { TransactionCategoryEntity } from '../transaction/entities/transaction-category.entity.ts';
+import { TransactionEntity } from '../transaction/entities/transaction.entity.ts';
+import { UserEntity } from '../user/entities/user.entity.ts';
 
 const envPath = resolve(import.meta.dirname, '../../.env');
 if (existsSync(envPath)) {
@@ -15,7 +22,16 @@ export const AppDataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [import.meta.dirname + '/../**/entities/*.entity{.ts,.js}'],
+  ssl: process.env.DATABASE_SSL === 'true' ? true : undefined,
+  entities: [
+    CompanyEntity,
+    ContactEntity,
+    PermissionSetEntity,
+    RoleEntity,
+    TransactionCategoryEntity,
+    TransactionEntity,
+    UserEntity,
+  ],
   migrations: [import.meta.dirname + '/migrations/*{.ts,.js}'],
   migrationsRun: false,
   synchronize: false,

@@ -12,6 +12,12 @@ export default defineConfig({
   server: {
     host: true,
     fs: { allow: [workspaceRoot] },
+    proxy: {
+      "/api": {
+        target: process.env.API_PROXY_TARGET || "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [tailwindcss(), reactRouter()],
 })
