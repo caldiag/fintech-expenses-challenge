@@ -19,7 +19,7 @@ export default function NavigationBar() {
 
   return (
     <div className="absolute top-0 left-0 z-1 flex h-15 w-screen items-center justify-end gap-1 p-4">
-      <ButtonGroup className="mr-4">
+      <ButtonGroup className="mr-6">
         <Input className="w-full bg-background" />
         <Button className="cursor-pointer bg-background" variant="outline">
           <IconSearch />
@@ -29,7 +29,7 @@ export default function NavigationBar() {
       <Button variant="outline">
         <IconRefresh /> Atualizar visualização
       </Button>
-      <ButtonGroup>
+      <ButtonGroup className="ml-6">
         <Button variant="outline" className="cursor-pointer">
           <Avatar className="h-4 w-4">
             <AvatarImage src="https://randomuser.me/api/portraits/men/75.jpg" />
