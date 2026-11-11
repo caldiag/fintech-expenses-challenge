@@ -1,5 +1,5 @@
 import { SortDirection } from "@app/types"
-import { IconCurrencyDollar, IconUser } from "@tabler/icons-react"
+import { IconUser } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
 import axiosClient from "~/auth/axios-client"
 import RecordTable from "~/components/data-display/record-table"
@@ -7,40 +7,29 @@ import { Button } from "~/components/ui/button"
 import { formatSmart } from "~/lib/utils/format-date"
 
 export default function Transactions() {
-  const [tableData, setTableData] = useState<any[]>([
-    // {
-    //   date: "Hoje",
-    //   amount: 100,
-    //   description: "Teste",
-    //   category: "Teste",
-    //   createdBy: "Caleb",
-    // },
-    // {
-    //   date: "3 minutos atrás",
-    //   amount: 200,
-    //   description: "Teste",
-    //   category: "Admin",
-    //   createdBy: "Outro usuário",
-    // },
-  ])
+  const [tableData, setTableData] = useState<any[]>([])
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const [sortDirection, setSortDirection] = useState<SortDirection>(
     SortDirection.DESC
   )
   const [sortBy, setSortBy] = useState<string>("date")
 
   useEffect(() => {
-    axiosClient.get("/transaction/all").then((d) => {
-      setTableData(
-        d.data.map((transaction: any) => parseTableData(transaction))
-      )
-    })
-  }, [])
+    axiosClient
+      .get("/transaction/all", { params: { page: currentPage } })
+      .then((d) => {
+        setTableData(
+          d.data.transactions.map((transaction: any) =>
+            parseTableData(transaction)
+          )
+        )
+        setTotalPages(d.data.totalPages)
+      })
+  }, [currentPage])
 
   return (
     <div className="w-fill">
-      <h3 className="mb-4 flex items-center gap-1">
-        <IconCurrencyDollar size={18} /> Transactions
-      </h3>
       <RecordTable
         data={tableData}
         columnKeys={[
@@ -60,6 +49,9 @@ export default function Transactions() {
         ]}
         sortableColumnKeys={["date", "amount", "description", "category"]}
         tableCaption="Transactions"
+        totalPages={totalPages}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
         setColumnSortDirection={(key, dir) => {
           setSortBy(key)
           setSortDirection(dir)

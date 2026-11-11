@@ -21,9 +21,6 @@ export default function Companies() {
 
   return (
     <div className="w-fill">
-      <h3 className="mb-4 flex items-center gap-1">
-        <IconBuilding size={18} /> Empresas
-      </h3>
       <RecordTable
         data={tableData}
         columnKeys={[

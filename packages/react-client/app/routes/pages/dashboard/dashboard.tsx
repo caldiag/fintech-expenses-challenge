@@ -6,7 +6,7 @@ export default function Dashboard() {
   return (
     <div className="flex">
       <Drawer />
-      <div className="min-w-0 flex-1 px-5 pt-18">
+      <div className="min-w-0 flex-1 px-5">
         <NavigationBar />
         <Outlet />
       </div>
