@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common/pipes/index.js';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import 'reflect-metadata';
 import { AppModule } from './app.module.ts';
 
 async function bootstrap() {
