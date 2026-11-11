@@ -1,6 +1,6 @@
 import type { AxiosResponse } from "axios"
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 import { AppRoutes } from "~/routes"
 import type { AuthContext } from "~/types/AuthContext"
 import axiosClient from "../axios-client"
@@ -8,6 +8,7 @@ import axiosClient from "../axios-client"
 export function useAuthContext() {
   const [authContext, setAuthContext] = useState<AuthContext>()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   useEffect(() => {
     checkLogin()
@@ -18,6 +19,9 @@ export function useAuthContext() {
       .get(`/login/me`)
       .then((d: AxiosResponse<AuthContext>) => {
         setAuthContext(d.data)
+        if (pathname === AppRoutes.Login || pathname === AppRoutes.Home) {
+          navigate(AppRoutes.Dashboard)
+        }
       })
       .catch(() => {
         navigate(AppRoutes.Login)
