@@ -1,9 +1,16 @@
-// organize-imports-ignore
-import { ValidationPipe } from '@nestjs/common/pipes/index.js';
-import { NestFactory } from '@nestjs/core';
-import cookieParser from 'cookie-parser';
 import 'reflect-metadata';
-import { AppModule } from './app.module.ts';
+
+const [
+  { ValidationPipe },
+  { NestFactory },
+  { default: cookieParser },
+  { AppModule },
+] = await Promise.all([
+  import('@nestjs/common/pipes/index.js'),
+  import('@nestjs/core'),
+  import('cookie-parser'),
+  import('./app.module.ts'),
+]);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
