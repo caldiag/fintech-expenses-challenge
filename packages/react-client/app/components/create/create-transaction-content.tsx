@@ -18,6 +18,7 @@ import {
 import { useEffect, useRef, useState } from "react"
 import axiosClient from "~/auth/axios-client"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { usePaginatedCompanies } from "~/hooks/use-paginated-companies"
 import {
   convertCurrencyAmount,
   currencies,
@@ -49,12 +50,6 @@ type TransactionRole = {
   id: string
   name: string
   icon: string
-}
-
-type TransactionCompany = {
-  id: string
-  name: string
-  websiteUrl: string
 }
 
 const ADD_CATEGORY_VALUE = "__add-category__"
@@ -99,7 +94,12 @@ export default function CreateTransactionContent({
   const [description, setDescription] = useState("")
   const [categories, setCategories] = useState<TransactionCategory[]>([])
   const [roles, setRoles] = useState<TransactionRole[]>([])
-  const [companies, setCompanies] = useState<TransactionCompany[]>([])
+  const {
+    companies,
+    hasError: hasCompanyLoadError,
+    isLoading: isLoadingCompanies,
+    loadNextPage: loadNextCompanyPage,
+  } = usePaginatedCompanies()
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null
   )
@@ -109,7 +109,6 @@ export default function CreateTransactionContent({
   )
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [isLoadingRoles, setIsLoadingRoles] = useState(true)
-  const [isLoadingCompanies, setIsLoadingCompanies] = useState(true)
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
   const [newCategoryIcon, setNewCategoryIcon] =
@@ -155,26 +154,20 @@ export default function CreateTransactionContent({
       }
     }
 
-    async function loadCompanies() {
-      try {
-        const response =
-          await axiosClient.get<TransactionCompany[]>("/company/all")
-        if (active) setCompanies(response.data)
-      } catch {
-        if (active) setError("Não foi possível carregar as empresas.")
-      } finally {
-        if (active) setIsLoadingCompanies(false)
-      }
-    }
-
     void loadCategories()
     void loadRoles()
-    void loadCompanies()
 
     return () => {
       active = false
     }
   }, [])
+
+  function handleCompaniesScroll(event: React.UIEvent<HTMLDivElement>) {
+    const { scrollTop, clientHeight, scrollHeight } = event.currentTarget
+    if (scrollHeight - scrollTop - clientHeight < 48) {
+      void loadNextCompanyPage()
+    }
+  }
 
   async function createCategory() {
     const name = newCategoryName.trim()
@@ -299,7 +292,10 @@ export default function CreateTransactionContent({
                     sideOffset={4}
                     className="z-50 outline-none"
                   >
-                    <Select.Popup className="max-h-(--available-height) min-w-56 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                    <Select.Popup
+                      className="max-h-(--available-height) min-w-56 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                      onScroll={handleCompaniesScroll}
+                    >
                       <Select.List>
                         {companies.map((company) => (
                           <Select.Item
@@ -332,7 +328,19 @@ export default function CreateTransactionContent({
                       </Select.List>
                       {!companies.length && !isLoadingCompanies && (
                         <p className="px-2 py-1 text-muted-foreground">
-                          Nenhuma empresa cadastrada
+                          {hasCompanyLoadError
+                            ? "Não foi possível carregar as empresas."
+                            : "Nenhuma empresa cadastrada"}
+                        </p>
+                      )}
+                      {companies.length > 0 && isLoadingCompanies && (
+                        <p className="px-2 py-1 text-muted-foreground">
+                          Carregando mais empresas...
+                        </p>
+                      )}
+                      {companies.length > 0 && hasCompanyLoadError && (
+                        <p role="alert" className="px-2 py-1 text-destructive">
+                          Não foi possível carregar mais empresas.
                         </p>
                       )}
                     </Select.Popup>

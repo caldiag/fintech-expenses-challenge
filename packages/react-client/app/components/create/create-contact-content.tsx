@@ -3,7 +3,8 @@ import {
   IconChevronDown,
   IconDeviceFloppy,
 } from "@tabler/icons-react"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
+import { usePaginatedCompanies } from "~/hooks/use-paginated-companies"
 import axiosClient from "~/auth/axios-client"
 import { Button } from "../ui/button"
 import {
@@ -16,11 +17,6 @@ import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
 import { Popover, PopoverContent } from "../ui/popover"
 
-type ContactCompany = {
-  id: string
-  name: string
-}
-
 export default function CreateContactContent({
   onCreated,
 }: {
@@ -30,34 +26,17 @@ export default function CreateContactContent({
   const [avatarUrl, setAvatarUrl] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
-  const [companies, setCompanies] = useState<ContactCompany[]>([])
   const [selectedCompanyIds, setSelectedCompanyIds] = useState<string[]>([])
   const [isCompaniesOpen, setIsCompaniesOpen] = useState(false)
-  const [isLoadingCompanies, setIsLoadingCompanies] = useState(true)
   const [isSavingContact, setIsSavingContact] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const companiesTriggerRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    let active = true
-
-    async function loadCompanies() {
-      try {
-        const response = await axiosClient.get<ContactCompany[]>("/company/all")
-        if (active) setCompanies(response.data)
-      } catch {
-        if (active) setError("Não foi possível carregar as empresas.")
-      } finally {
-        if (active) setIsLoadingCompanies(false)
-      }
-    }
-
-    void loadCompanies()
-
-    return () => {
-      active = false
-    }
-  }, [])
+  const {
+    companies,
+    hasError: hasCompanyLoadError,
+    isLoading: isLoadingCompanies,
+    loadNextPage: loadNextCompanyPage,
+  } = usePaginatedCompanies()
 
   function toggleCompany(companyId: string) {
     setSelectedCompanyIds((current) =>
@@ -65,6 +44,13 @@ export default function CreateContactContent({
         ? current.filter((id) => id !== companyId)
         : [...current, companyId]
     )
+  }
+
+  function handleCompaniesScroll(event: React.UIEvent<HTMLDivElement>) {
+    const { scrollTop, clientHeight, scrollHeight } = event.currentTarget
+    if (scrollHeight - scrollTop - clientHeight < 48) {
+      void loadNextCompanyPage()
+    }
   }
 
   async function submitContact(event: React.FormEvent<HTMLFormElement>) {
@@ -162,7 +148,8 @@ export default function CreateContactContent({
                 <PopoverContent
                   anchor={companiesTriggerRef}
                   align="start"
-                  className="w-(--anchor-width) gap-1"
+                  className="max-h-64 w-(--anchor-width) gap-1 overflow-y-auto"
+                  onScroll={handleCompaniesScroll}
                 >
                   {companies.length ? (
                     companies.map((company) => {
@@ -184,9 +171,21 @@ export default function CreateContactContent({
                     })
                   ) : (
                     <p className="px-2 py-1 text-muted-foreground">
-                      {isLoadingCompanies
-                        ? "Carregando empresas..."
-                        : "Nenhuma empresa cadastrada"}
+                      {hasCompanyLoadError
+                        ? "Não foi possível carregar as empresas."
+                        : isLoadingCompanies
+                          ? "Carregando empresas..."
+                          : "Nenhuma empresa cadastrada"}
+                    </p>
+                  )}
+                  {companies.length > 0 && isLoadingCompanies && (
+                    <p className="px-2 py-1 text-muted-foreground">
+                      Carregando mais empresas...
+                    </p>
+                  )}
+                  {companies.length > 0 && hasCompanyLoadError && (
+                    <p role="alert" className="px-2 py-1 text-destructive">
+                      Não foi possível carregar mais empresas.
                     </p>
                   )}
                 </PopoverContent>
