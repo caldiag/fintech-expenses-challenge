@@ -2,7 +2,6 @@ import {
   IconBuilding,
   IconCurrencyDollar,
   IconGitCompare,
-  IconHeart,
   IconHome,
   IconUsers,
 } from "@tabler/icons-react"
@@ -11,7 +10,6 @@ import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Separator } from "~/components/ui/separator"
 import { AppRoutes } from "~/routes"
-import { Empty, EmptyDescription, EmptyMedia } from "../ui/empty"
 import Title from "../ui/title"
 
 export default function Drawer() {
@@ -32,7 +30,7 @@ export default function Drawer() {
       </CardHeader>
       <CardContent>
         <Button
-          onClick={() => navigate(AppRoutes.Dashboard)}
+          onClick={() => navigate(AppRoutes.Summary)}
           className={
             buttonStyling +
             (pathname === AppRoutes.Dashboard
@@ -84,15 +82,6 @@ export default function Drawer() {
           <IconUsers /> Contatos
         </Button>
         <Separator className="my-6" />
-        <Empty className="opacity-60">
-          <EmptyMedia variant="icon" className="bg-sidebar-border">
-            <IconHeart />
-          </EmptyMedia>
-          <EmptyDescription>
-            Adicione empresas ou contatos à sua lista de favoritos e eles
-            aparecerão aqui
-          </EmptyDescription>
-        </Empty>
       </CardContent>
     </Card>
   )

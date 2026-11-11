@@ -32,8 +32,12 @@ export default function NavigationBar() {
             <IconSearch />
           </Button>
         </ButtonGroup>
-        {pathname !== AppRoutes.Dashboard && <CreateDialog />}
-        <Button variant="outline" onClick={refreshView}>
+        {pathname !== AppRoutes.Summary && <CreateDialog />}
+        <Button
+          className="cursor-pointer"
+          variant="outline"
+          onClick={refreshView}
+        >
           <IconRefresh /> Atualizar visualização
         </Button>
         <ButtonGroup className="ml-6">
@@ -65,6 +69,8 @@ function getNavbarTitle(pathname: AppRoutes) {
       return "Transações"
     case AppRoutes.Contacts:
       return "Contatos"
+    case AppRoutes.Summary:
+      return "Resumo"
     default:
       return ""
   }
