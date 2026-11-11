@@ -1,9 +1,10 @@
 import { SortDirection } from "@app/types"
-import { IconBuilding, IconUser } from "@tabler/icons-react"
+import { IconArrowUpRight } from "@tabler/icons-react"
 import { useState } from "react"
+import CompanyCustomCell from "~/components/data-display/custom-cell/company"
 import RecordTable from "~/components/data-display/record-table"
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { Button } from "~/components/ui/button"
+import { getTablerIcon } from "~/lib/utils/tabler-icons"
 
 export default function Companies() {
   const [tableData, setTableData] = useState<any[]>([
@@ -27,39 +28,39 @@ export default function Companies() {
           {
             key: "name",
             label: "Nome",
-            customComponent: (children, item) => {
-              return (
-                <div className="flex items-center gap-1">
-                  <Avatar className="h-4 w-4 rounded-none after:hidden">
-                    <AvatarImage
-                      src={
-                        "https://" +
-                        item.websiteUrl
-                          .replace("https://", "")
-                          .replace("http://", "") +
-                        "/favicon.ico"
-                      }
-                      className="rounded-none"
-                    />
-                    <AvatarFallback className="rounded-none text-sm">
-                      <IconBuilding />
-                    </AvatarFallback>
-                  </Avatar>
-                  {children}
-                </div>
-              )
-            },
+            icon: getTablerIcon("IconPencil"),
+            customComponent: (children, item) => (
+              <CompanyCustomCell children={children} item={item} />
+            ),
           },
-          { key: "email", label: "E-mail" },
-          { key: "areaCode", label: "CEP" },
+          { key: "email", label: "E-mail", icon: getTablerIcon("IconAt") },
           {
-            key: "createdBy",
-            label: "Criado por",
-            customComponent: (children) => (
-              <Button variant="ghost">
-                <IconUser /> {children}
+            key: "websiteUrl",
+            label: "Site da empresa",
+            icon: getTablerIcon("IconWorld"),
+            customComponent: (children, item) => (
+              <Button
+                size="sm"
+                onClick={() => {
+                  window.open(
+                    "http://" +
+                      item.websiteUrl
+                        .replace("http://", "")
+                        .replace("https://", "")
+                  )
+                }}
+                className="cursor-pointer"
+                variant="link"
+              >
+                {children}
+                <IconArrowUpRight />
               </Button>
             ),
+          },
+          {
+            key: "areaCode",
+            label: "CEP",
+            icon: getTablerIcon("IconAddressBook"),
           },
         ]}
         sortableColumnKeys={["name", "email"]}

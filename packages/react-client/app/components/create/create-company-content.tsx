@@ -5,6 +5,7 @@ import {
 } from "@tabler/icons-react"
 import { useRef, useState } from "react"
 import axiosClient from "~/auth/axios-client"
+import { toast } from "~/components/ui/toast"
 import { usePaginatedContacts } from "~/hooks/use-paginated-contacts"
 import { Button } from "../ui/button"
 import {
@@ -66,6 +67,11 @@ export default function CreateCompanyContent({
         email: email.trim() || null,
         phone: phone.trim() || null,
         contactIds: selectedContactIds,
+      })
+      toast.add({
+        type: "success",
+        title: "Sucesso",
+        description: "Empresa criada com sucesso.",
       })
       onCreated()
     } catch {

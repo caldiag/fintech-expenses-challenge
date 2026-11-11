@@ -1,16 +1,18 @@
 import {
   IconBuilding,
   IconCurrencyDollar,
+  IconGitCompare,
   IconHeart,
   IconHome,
   IconUsers,
 } from "@tabler/icons-react"
 import { useLocation, useNavigate } from "react-router"
 import { Button } from "~/components/ui/button"
-import { Card, CardContent } from "~/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Separator } from "~/components/ui/separator"
 import { AppRoutes } from "~/routes"
 import { Empty, EmptyDescription, EmptyMedia } from "../ui/empty"
+import Title from "../ui/title"
 
 export default function Drawer() {
   const { pathname } = useLocation()
@@ -18,6 +20,16 @@ export default function Drawer() {
 
   return (
     <Card className="z-2 h-screen max-w-65 rounded-none bg-sidebar">
+      <CardHeader>
+        <CardTitle>
+          <Title
+            Icon={() => (
+              <IconGitCompare className="rounded-sm bg-orange-200 p-1 text-orange-700" />
+            )}
+            title="Fintech Expenses"
+          />
+        </CardTitle>
+      </CardHeader>
       <CardContent>
         <Button
           onClick={() => navigate(AppRoutes.Dashboard)}

@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react"
 import axiosClient from "~/auth/axios-client"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { toast } from "~/components/ui/toast"
 import { usePaginatedCompanies } from "~/hooks/use-paginated-companies"
 import {
   convertCurrencyAmount,
@@ -166,6 +167,11 @@ export default function CreateTransactionContent({
       setSelectedCategoryId(category.id)
       setNewCategoryName("")
       setIsCategoryPopoverOpen(false)
+      toast.add({
+        type: "success",
+        title: "Sucesso",
+        description: "Categoria criada com sucesso.",
+      })
     } catch {
       setError("Não foi possível criar a categoria.")
     } finally {
@@ -206,6 +212,11 @@ export default function CreateTransactionContent({
         transactionCategoryId: selectedCategoryId,
         roleId: selectedRoleId,
         companyId: selectedCompanyId,
+      })
+      toast.add({
+        type: "success",
+        title: "Sucesso",
+        description: "Transação criada com sucesso.",
       })
       onCreated()
     } catch {

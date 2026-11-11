@@ -7,3 +7,4 @@ export {
   PermissionSet,
 } from "./permissions.js";
 export { Currency, SortDirection };
+export { TransactionDirection } from "./transaction.js";

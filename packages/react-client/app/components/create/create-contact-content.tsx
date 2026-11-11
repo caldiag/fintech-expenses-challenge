@@ -7,6 +7,7 @@ import {
 import { useRef, useState } from "react"
 import axiosClient from "~/auth/axios-client"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { toast } from "~/components/ui/toast"
 import { usePaginatedCompanies } from "~/hooks/use-paginated-companies"
 import { Button } from "../ui/button"
 import {
@@ -66,6 +67,11 @@ export default function CreateContactContent({
         email: email.trim(),
         phone: phone.trim() || null,
         companyIds: selectedCompanyIds,
+      })
+      toast.add({
+        type: "success",
+        title: "Sucesso",
+        description: "Contato criado com sucesso.",
       })
       onCreated()
     } catch {

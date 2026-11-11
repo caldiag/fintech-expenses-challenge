@@ -19,9 +19,9 @@ export default function NavigationBar() {
   const { pathname } = useLocation()
 
   return (
-    <div className="w-fill sticky top-0 z-1 mb-6 flex h-12 items-center justify-between gap-1 border-b-1">
+    <div className="w-fill sticky top-0 z-1 mb-4 flex h-10 items-center justify-between gap-1 border-b-1 p-3 px-4">
       <div>
-        <Title title="Transações" />
+        <Title title={getNavbarTitle(pathname as AppRoutes)} />
       </div>
       <div className="flex gap-1">
         <ButtonGroup className="mr-6">
@@ -51,4 +51,19 @@ export default function NavigationBar() {
       </div>
     </div>
   )
+}
+
+function getNavbarTitle(pathname: AppRoutes) {
+  switch (pathname) {
+    case AppRoutes.Dashboard:
+      return "Dashboard"
+    case AppRoutes.Companies:
+      return "Empresas"
+    case AppRoutes.Transactions:
+      return "Transações"
+    case AppRoutes.Contacts:
+      return "Contatos"
+    default:
+      return ""
+  }
 }

@@ -1,7 +1,13 @@
 import type { SortDirection } from "@app/types"
-import { IconArrowsSort, IconCubePlus, IconFilter } from "@tabler/icons-react"
+import {
+  IconArrowsSort,
+  IconCubePlus,
+  IconFilter,
+  type TablerIcon,
+} from "@tabler/icons-react"
 import type { ReactNode } from "react"
 import { Button } from "../ui/button"
+import { ButtonGroup } from "../ui/button-group"
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty"
 import {
   Table,
@@ -19,6 +25,7 @@ type RecordTableProps = {
     key: string
     label: string
     customComponent?: (children: ReactNode, item: any) => ReactNode
+    icon: TablerIcon
   }[]
   sortableColumnKeys: string[]
   tableCaption: string
@@ -41,13 +48,15 @@ export default function RecordTable({
   return (
     <div>
       <div className="mb-2 flex w-full items-center justify-between gap-1">
-        <div className="flex items-center gap-1">
-          <Button variant="ghost">
-            <IconFilter /> Filtros
-          </Button>
-          <Button variant="ghost">
-            <IconArrowsSort /> Ordenar
-          </Button>
+        <div className="flex w-full items-center gap-1">
+          <ButtonGroup>
+            <Button variant="outline">
+              <IconFilter /> Filtros
+            </Button>
+            <Button variant="outline">
+              <IconArrowsSort /> Ordenar
+            </Button>
+          </ButtonGroup>
         </div>
         {onPageChange && (
           <RecordTablePagination
@@ -57,18 +66,21 @@ export default function RecordTable({
           />
         )}
       </div>
-      <div className="overflow-hidden rounded-sm border-1 border-r-0">
+      <div className="overflow-hidden border-b-1">
         <Table>
           <TableHeader>
             <TableRow>
-              {columnKeys.map((columnKey) => (
-                <TableHead
-                  className="h-8 border-r-1 bg-sidebar"
-                  key={columnKey.key}
-                >
-                  {columnKey.label}
-                </TableHead>
-              ))}
+              {columnKeys.map((columnKey) => {
+                const Icon = columnKey.icon
+                return (
+                  <TableHead className="border-r-1" key={columnKey.key}>
+                    <div className="flex items-center gap-1">
+                      {<Icon size={12} />}
+                      {columnKey.label}
+                    </div>
+                  </TableHead>
+                )
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -76,7 +88,7 @@ export default function RecordTable({
               return (
                 <TableRow>
                   {columnKeys.map((columnKey) => (
-                    <TableCell className="h-4 border-r-1" key={columnKey.key}>
+                    <TableCell className="border-r-1" key={columnKey.key}>
                       {!columnKey.customComponent && data[i][columnKey.key]}
                       {columnKey.customComponent && (
                         <>
