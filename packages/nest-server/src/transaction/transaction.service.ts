@@ -73,6 +73,9 @@ export class TransactionService {
         amountCents: filters.amountCents,
       }),
       ...(filters.currency && { currency: filters.currency }),
+      ...(filters.transactionDirection && {
+        transactionDirection: filters.transactionDirection,
+      }),
       ...(filters.transactionCategoryId && {
         transactionCategory: { id: filters.transactionCategoryId },
       }),
@@ -83,7 +86,12 @@ export class TransactionService {
     const [transactions, total] = await this.transactionRepository.findAndCount(
       {
         where,
-        relations: { transactionCategory: true, createdBy: true },
+        relations: {
+          transactionCategory: true,
+          createdBy: true,
+          role: true,
+          company: true,
+        },
         order: { createdAt: 'DESC', id: 'DESC' },
         take: TRANSACTION_PAGE_SIZE,
         skip: page * TRANSACTION_PAGE_SIZE,
