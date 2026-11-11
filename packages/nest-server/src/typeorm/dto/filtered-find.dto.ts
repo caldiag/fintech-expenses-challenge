@@ -1,18 +1,18 @@
 import { SortDirection } from '@app/types';
-import { IsDate, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export default class FilteredFindDTO {
   @IsUUID('4')
   @IsOptional()
   createdById?: string;
 
-  @IsDate()
+  @IsDateString()
   @IsOptional()
-  fromDate?: Date;
+  fromDate?: string;
 
-  @IsDate()
+  @IsDateString()
   @IsOptional()
-  toDate?: Date;
+  toDate?: string;
 
   @IsString()
   @IsOptional()

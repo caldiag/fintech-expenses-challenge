@@ -1,28 +1,30 @@
 import { Currency, TransactionDirection } from '@app/types';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsString, IsUUID, Max } from 'class-validator';
 
 export default class CreateTransactionDTO {
   @IsString()
   description: string;
 
   @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Max(2147483647)
   amount: number;
 
   @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
+  @Max(99)
   amountCents: number;
 
-  @IsString()
+  @IsEnum(Currency)
   currency: Currency;
 
   @IsEnum(TransactionDirection)
   transactionDirection: TransactionDirection;
 
-  @IsString()
+  @IsUUID('4')
   transactionCategoryId: string;
 
-  @IsString()
+  @IsUUID('4')
   roleId: string;
 
-  @IsString()
+  @IsUUID('4')
   companyId: string;
 }

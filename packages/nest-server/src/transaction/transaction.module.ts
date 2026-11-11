@@ -15,5 +15,6 @@ import { TransactionService } from './transaction.service.ts';
     PermissionsModule,
   ],
   controllers: [TransactionController],
+  exports: [TransactionService],
 })
 export class TransactionModule {}

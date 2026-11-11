@@ -3,20 +3,31 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
 import { PermissionsService } from '../permissions/permissions.service.ts';
+import {
+  toStrictResponseDto,
+  toStrictResponseDtoArray,
+} from '../typeorm/dto/strict-response.dto.ts';
 import { UserService } from '../user/user.service.ts';
 import CreateTransactionCategoryDTO from './dto/create-transaction-category.dto.ts';
 import CreateTransactionDTO from './dto/create-transaction.dto.ts';
 import GetTransactionsDTO from './dto/get-transactions.dto.ts';
-import { TransactionCategoryEntity } from './entities/transaction-category.entity.ts';
-import { TransactionEntity } from './entities/transaction.entity.ts';
+import {
+  TransactionCategoryResponseDTO,
+  TransactionPageResponseDTO,
+  TransactionResponseDTO,
+} from './dto/transaction-response.dto.ts';
 import { TransactionService } from './transaction.service.ts';
 
 @Controller('transaction')
@@ -31,7 +42,7 @@ export class TransactionController {
   async createTransaction(
     @Body() transaction: CreateTransactionDTO,
     @UserContext() userId: string,
-  ): Promise<TransactionEntity> {
+  ): Promise<TransactionResponseDTO> {
     const { roleId, transactionCategoryId, companyId, ...transactionData } =
       transaction;
     const user = await this.userService.getUserById(userId);
@@ -46,21 +57,74 @@ export class TransactionController {
       throw new ForbiddenException('Cannot create a transaction for this role');
     }
 
-    return await this.transactionService.createTransaction(
-      transactionData,
-      transactionCategoryId,
-      roleId,
-      companyId,
-      userId,
+    return toStrictResponseDto(
+      TransactionResponseDTO,
+      await this.transactionService.createTransaction(
+        transactionData,
+        transactionCategoryId,
+        roleId,
+        companyId,
+        userId,
+      ),
     );
+  }
+
+  @Patch(':id')
+  async updateTransaction(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() transaction: CreateTransactionDTO,
+    @UserContext() userId: string,
+  ): Promise<TransactionResponseDTO> {
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new BadRequestException('User not found');
+    const existing = await this.transactionService.findTransactionById(id);
+    if (!existing) throw new NotFoundException('Transaction not found');
+    const scope = await this.permissionService.validateUserPermissionScope(
+      userId,
+      PermissionKey.TransactionUpdateScope,
+    );
+    if (!this.permissionService.canAccessTransaction(scope, user, existing)) {
+      throw new ForbiddenException('Cannot update this transaction');
+    }
+    if (
+      scope === PermissionScope.ROLE &&
+      user.role?.id !== transaction.roleId
+    ) {
+      throw new ForbiddenException(
+        'Cannot assign this transaction to another role',
+      );
+    }
+    return toStrictResponseDto(
+      TransactionResponseDTO,
+      await this.transactionService.updateTransaction(id, transaction),
+    );
+  }
+
+  @Delete(':id')
+  async deleteTransaction(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UserContext() userId: string,
+  ): Promise<void> {
+    const user = await this.userService.getUserById(userId);
+    const transaction = await this.transactionService.findTransactionById(id);
+    if (!transaction) throw new NotFoundException('Transaction not found');
+    const scope = await this.permissionService.validateUserPermissionScope(
+      userId,
+      PermissionKey.TransactionDeleteScope,
+    );
+    if (
+      !this.permissionService.canAccessTransaction(scope, user, transaction)
+    ) {
+      throw new ForbiddenException('Cannot delete this transaction');
+    }
+    await this.transactionService.deleteTransaction(id);
   }
 
   @Get('all')
   async getAllTransactions(
     @UserContext() userId: string,
     @Query() query: GetTransactionsDTO,
-    @Query('page') pageParam?: string,
-  ) {
+  ): Promise<TransactionPageResponseDTO> {
     const user = await this.userService.getUserById(userId);
     if (!user) throw new BadRequestException('User not found');
 
@@ -69,10 +133,10 @@ export class TransactionController {
       PermissionKey.TransactionReadScope,
     );
 
-    const filters = { ...query };
+    const { page = 0, ...filters } = query;
 
-    if (filters.roleId && readScope === PermissionScope.ROLE) {
-      //force filtering by their role if they can't access a different role
+    if (readScope === PermissionScope.ROLE) {
+      if (!user.role) throw new ForbiddenException('A role is required');
       filters.roleId = user.role.id;
     }
 
@@ -81,34 +145,65 @@ export class TransactionController {
       filters.createdById = user.id;
     }
 
-    const page = Number(pageParam ?? 0);
-    if (!Number.isInteger(page) || page < 0) {
-      throw new BadRequestException('Page must be a non-negative integer');
-    }
-
-    return await this.transactionService.findTransactions(filters, page);
+    return toStrictResponseDto(
+      TransactionPageResponseDTO,
+      await this.transactionService.findTransactions(filters, page),
+    );
   }
 
   @Post('category/create')
   async createTransactionCategory(
     @Body() transactionCategory: CreateTransactionCategoryDTO,
     @UserContext() userId: string,
-  ) {
-    return await this.transactionService.createTransactionCategory(
-      transactionCategory,
-      userId,
+  ): Promise<TransactionCategoryResponseDTO> {
+    return toStrictResponseDto(
+      TransactionCategoryResponseDTO,
+      await this.transactionService.createTransactionCategory(
+        transactionCategory,
+        userId,
+      ),
     );
   }
 
   @Get('category/all')
-  async getAllTransactionCategories(): Promise<TransactionCategoryEntity[]> {
-    return await this.transactionService.findAllTransactionCategories();
+  async getAllTransactionCategories(): Promise<
+    TransactionCategoryResponseDTO[]
+  > {
+    return toStrictResponseDtoArray(
+      TransactionCategoryResponseDTO,
+      await this.transactionService.findAllTransactionCategories(),
+    );
   }
 
   @Get('category/:id')
   async getTransactionCategory(
-    @Param() id: string,
-  ): Promise<TransactionCategoryEntity | null> {
-    return await this.transactionService.findTransactionCategoryById(id);
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<TransactionCategoryResponseDTO | null> {
+    const category =
+      await this.transactionService.findTransactionCategoryById(id);
+    return category
+      ? toStrictResponseDto(TransactionCategoryResponseDTO, category)
+      : null;
+  }
+
+  @Get(':id')
+  async getTransaction(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UserContext() userId: string,
+  ): Promise<TransactionResponseDTO> {
+    const user = await this.userService.getUserById(userId);
+    const transaction = await this.transactionService.findTransactionById(id);
+    if (!transaction) throw new NotFoundException('Transaction not found');
+
+    const scope = await this.permissionService.validateUserPermissionScope(
+      userId,
+      PermissionKey.TransactionReadScope,
+    );
+    if (
+      !this.permissionService.canAccessTransaction(scope, user, transaction)
+    ) {
+      throw new ForbiddenException('Cannot read this transaction');
+    }
+    return toStrictResponseDto(TransactionResponseDTO, transaction);
   }
 }
