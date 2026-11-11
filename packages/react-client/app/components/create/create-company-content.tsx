@@ -1,26 +1,15 @@
 import { PermissionKey } from "@app/types"
-import {
-  IconCheck,
-  IconChevronDown,
-  IconDeviceFloppy,
-} from "@tabler/icons-react"
-import { useEffect, useRef, useState } from "react"
+import { IconCheck, IconChevronDown } from "@tabler/icons-react"
+import { useRef, useState } from "react"
 import { useForm } from "react-hook-form"
-import axiosClient from "~/auth/axios-client"
-import { useAuthContext } from "~/auth/hooks/useAuthContext"
-import { toast } from "~/components/ui/toast"
 import { usePaginatedContacts } from "~/hooks/use-paginated-contacts"
-import { hasRecordScopeAccess } from "~/lib/utils/record-permissions"
 import { Button } from "../ui/button"
-import {
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog"
+import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
 import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { useRecordForm } from "./hooks/use-record-form"
+import { RecordFormFooter } from "./utils/record-form-footer"
 
 type CompanyFormValues = {
   name: string
@@ -31,6 +20,17 @@ type CompanyFormValues = {
   contactIds: string[]
 }
 
+function mapCompanyRecord(data: any): CompanyFormValues {
+  return {
+    name: data.name,
+    websiteUrl: data.websiteUrl,
+    areaCode: data.areaCode ?? "",
+    email: data.email ?? "",
+    phone: data.phone ?? "",
+    contactIds: data.contacts.map((contact: { id: string }) => contact.id),
+  }
+}
+
 export default function CreateCompanyContent({
   onCreated,
   recordId,
@@ -38,7 +38,6 @@ export default function CreateCompanyContent({
   onCreated: () => void
   recordId?: string
 }) {
-  const { authContext } = useAuthContext()
   const { handleSubmit, register, reset, setValue, watch } =
     useForm<CompanyFormValues>({
       defaultValues: {
@@ -51,66 +50,41 @@ export default function CreateCompanyContent({
       },
     })
   const selectedContactIds = watch("contactIds")
-  const [editingRecord, setEditingRecord] = useState<any>()
-  const [isLoadingRecord, setIsLoadingRecord] = useState(Boolean(recordId))
   const [isContactsOpen, setIsContactsOpen] = useState(false)
-  const [isSavingCompany, setIsSavingCompany] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const contactsTriggerRef = useRef<HTMLButtonElement>(null)
+  const {
+    canDelete,
+    canEdit,
+    deleteRecord,
+    error,
+    isLoadingRecord,
+    isSavingRecord,
+    saveRecord,
+  } = useRecordForm({
+    recordId,
+    endpoint: "/company",
+    createEndpoint: "/company/create",
+    updatePermission: PermissionKey.CompanyUpdateScope,
+    deletePermission: PermissionKey.CompanyDeleteScope,
+    reset,
+    mapRecord: mapCompanyRecord,
+    onCreated,
+    messages: {
+      loadError: "Não foi possível carregar a empresa.",
+      saveError: "Não foi possível salvar a empresa.",
+      deleteError: "Não foi possível excluir a empresa.",
+      deleteConfirm: "Excluir esta empresa?",
+      created: "Empresa criada com sucesso.",
+      updated: "Empresa atualizada com sucesso.",
+      deleted: "Empresa excluída com sucesso.",
+    },
+  })
   const {
     contacts,
     hasError: hasContactLoadError,
     isLoading: isLoadingContacts,
     loadNextPage: loadNextContactPage,
   } = usePaginatedContacts()
-  const canEdit =
-    !recordId ||
-    hasRecordScopeAccess(
-      authContext?.permissionSet[PermissionKey.CompanyUpdateScope],
-      authContext,
-      editingRecord
-    )
-  const canDelete =
-    Boolean(recordId) &&
-    hasRecordScopeAccess(
-      authContext?.permissionSet[PermissionKey.CompanyDeleteScope],
-      authContext,
-      editingRecord
-    )
-
-  useEffect(() => {
-    if (!recordId) return
-    let active = true
-    setEditingRecord(undefined)
-    setError(null)
-    setIsLoadingRecord(true)
-    axiosClient
-      .get(`/company/${recordId}`)
-      .then(({ data }) => {
-        if (!active) return
-        setEditingRecord(data)
-        reset({
-          name: data.name,
-          websiteUrl: data.websiteUrl,
-          areaCode: data.areaCode ?? "",
-          email: data.email ?? "",
-          phone: data.phone ?? "",
-          contactIds: data.contacts.map(
-            (contact: { id: string }) => contact.id
-          ),
-        })
-      })
-      .catch(() => {
-        if (active) setError("Não foi possível carregar a empresa.")
-      })
-      .finally(() => {
-        if (active) setIsLoadingRecord(false)
-      })
-    return () => {
-      active = false
-    }
-  }, [recordId, reset])
-
   function handleContactsScroll(event: React.UIEvent<HTMLDivElement>) {
     const { scrollTop, clientHeight, scrollHeight } = event.currentTarget
     if (scrollHeight - scrollTop - clientHeight < 48) {
@@ -129,50 +103,14 @@ export default function CreateCompanyContent({
   }
 
   async function submitCompany(values: CompanyFormValues) {
-    setError(null)
-    setIsSavingCompany(true)
-    try {
-      const payload = {
-        name: values.name.trim(),
-        websiteUrl: values.websiteUrl.trim(),
-        areaCode: values.areaCode.trim() || null,
-        email: values.email.trim() || null,
-        phone: values.phone.trim() || null,
-        contactIds: values.contactIds,
-      }
-      if (recordId) {
-        await axiosClient.patch(`/company/${recordId}`, payload)
-      } else {
-        await axiosClient.post("/company/create", payload)
-      }
-      toast.add({
-        type: "success",
-        title: "Sucesso",
-        description: recordId
-          ? "Empresa atualizada com sucesso."
-          : "Empresa criada com sucesso.",
-      })
-      onCreated()
-    } catch {
-      setError("Não foi possível salvar a empresa.")
-    } finally {
-      setIsSavingCompany(false)
-    }
-  }
-
-  async function deleteCompany() {
-    if (!recordId || !window.confirm("Excluir esta empresa?")) return
-    try {
-      await axiosClient.delete(`/company/${recordId}`)
-      toast.add({
-        type: "success",
-        title: "Sucesso",
-        description: "Empresa excluída com sucesso.",
-      })
-      onCreated()
-    } catch {
-      setError("Não foi possível excluir a empresa.")
-    }
+    await saveRecord({
+      name: values.name.trim(),
+      websiteUrl: values.websiteUrl.trim(),
+      areaCode: values.areaCode.trim() || null,
+      email: values.email.trim() || null,
+      phone: values.phone.trim() || null,
+      contactIds: values.contactIds,
+    })
   }
 
   return (
@@ -320,24 +258,16 @@ export default function CreateCompanyContent({
             </p>
           )}
         </FieldGroup>
-        <DialogFooter className="mt-4">
-          {isLoadingRecord && <span>Carregando empresa...</span>}
-          {canDelete && (
-            <Button type="button" variant="destructive" onClick={deleteCompany}>
-              Excluir
-            </Button>
-          )}
-          {canEdit && (
-            <Button type="submit" disabled={isSavingCompany || isLoadingRecord}>
-              <IconDeviceFloppy />
-              {isSavingCompany
-                ? "Salvando..."
-                : recordId
-                  ? "Salvar alterações"
-                  : "Salvar"}
-            </Button>
-          )}
-        </DialogFooter>
+        <RecordFormFooter
+          loadingMessage="Carregando empresa..."
+          isLoadingRecord={isLoadingRecord}
+          canDelete={canDelete}
+          onDelete={deleteRecord}
+          canEdit={canEdit}
+          isSaving={isSavingRecord}
+          isSubmitDisabled={isLoadingRecord}
+          recordId={recordId}
+        />
       </form>
     </DialogContent>
   )
