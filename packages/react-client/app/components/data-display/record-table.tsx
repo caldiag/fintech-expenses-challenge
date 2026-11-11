@@ -2,7 +2,6 @@ import type { SortDirection } from "@app/types"
 import {
   IconArrowsSort,
   IconCubePlus,
-  IconFilter,
   type TablerIcon,
 } from "@tabler/icons-react"
 import type { ReactNode } from "react"
@@ -17,7 +16,16 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table"
+import type {
+  RecordTableFilter,
+  RecordTableFilterDefinition,
+} from "./record-table-filters"
+import RecordTableFilters from "./record-table-filters"
 import RecordTablePagination from "./record-table-pagination"
+export type {
+  RecordTableFilter,
+  RecordTableFilterDefinition,
+} from "./record-table-filters"
 
 type RecordTableProps = {
   data: any[]
@@ -33,6 +41,9 @@ type RecordTableProps = {
   currentPage?: number
   onPageChange?: (page: number) => void
   setColumnSortDirection: (columnKey: string, direction: SortDirection) => void
+  filterableColumnKeys?: RecordTableFilterDefinition[]
+  onFiltersChange?: (filters: RecordTableFilter[]) => void
+  onRowClick?: (item: any) => void
 }
 
 export default function RecordTable({
@@ -44,15 +55,21 @@ export default function RecordTable({
   currentPage = 0,
   onPageChange,
   setColumnSortDirection,
+  filterableColumnKeys = [],
+  onFiltersChange,
+  onRowClick,
 }: RecordTableProps) {
   return (
     <div>
       <div className="mb-2 flex w-full items-center justify-between gap-1">
         <div className="flex w-full items-center gap-1">
           <ButtonGroup>
-            <Button variant="outline">
-              <IconFilter /> Filtros
-            </Button>
+            {filterableColumnKeys.length > 0 && (
+              <RecordTableFilters
+                filterableColumnKeys={filterableColumnKeys}
+                onFiltersChange={onFiltersChange}
+              />
+            )}
             <Button variant="outline">
               <IconArrowsSort /> Ordenar
             </Button>
@@ -86,7 +103,28 @@ export default function RecordTable({
           <TableBody>
             {data.map((row, i) => {
               return (
-                <TableRow>
+                <TableRow
+                  key={row.id ?? i}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  aria-label={onRowClick ? `Abrir ${tableCaption}` : undefined}
+                  className={
+                    onRowClick ? "cursor-pointer hover:bg-muted/50" : undefined
+                  }
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  onKeyDown={
+                    onRowClick
+                      ? (event) => {
+                          if (
+                            event.target === event.currentTarget &&
+                            (event.key === "Enter" || event.key === " ")
+                          ) {
+                            event.preventDefault()
+                            onRowClick(row)
+                          }
+                        }
+                      : undefined
+                  }
+                >
                   {columnKeys.map((columnKey) => (
                     <TableCell className="border-r-1" key={columnKey.key}>
                       {!columnKey.customComponent && data[i][columnKey.key]}
