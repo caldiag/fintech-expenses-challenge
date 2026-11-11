@@ -56,7 +56,7 @@ export default function NavigationBar() {
 function getNavbarTitle(pathname: AppRoutes) {
   switch (pathname) {
     case AppRoutes.Dashboard:
-      return "Dashboard"
+      return "Resumo"
     case AppRoutes.Companies:
       return "Empresas"
     case AppRoutes.Transactions:
