@@ -19,9 +19,6 @@ export class TransactionCategoryEntity extends BaseEntity {
   name: string;
 
   @Column('varchar')
-  description: string;
-
-  @Column('varchar')
   icon: string;
 
   @ManyToOne(() => UserEntity)
