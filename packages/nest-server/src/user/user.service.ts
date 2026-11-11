@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/browser/repository/Repository.js';
-import { UserEntity } from './entities/user.entity.ts';
-import { CreateUserDTO } from './dto/user.dto.ts';
 import { hashPassword } from '../auth/utils/password-utils.ts';
+import { CreateUserDTO } from './dto/user.dto.ts';
+import { UserEntity } from './entities/user.entity.ts';
 
 @Injectable()
 export class UserService {
@@ -30,7 +30,7 @@ export class UserService {
   async getUserById(id: string): Promise<UserEntity | null> {
     return await this.userRepository.findOneOrFail({
       where: { id },
-      relations: { role: true },
+      relations: { role: { permissionSet: true }, permissionSet: true },
     });
   }
 

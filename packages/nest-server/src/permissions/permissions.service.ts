@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { PermissionKey, PermissionScope, PermissionSet } from '@app/types';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RoleEntity } from './entities/role.entity.ts';
-import { Repository } from 'typeorm';
-import { PermissionSetEntity } from './entities/permission-set.entity.ts';
-import { PermissionSet } from '@app/types';
+import { DataSource, Repository } from 'typeorm';
 import { UserService } from '../user/user.service.ts';
-import { DataSource } from 'typeorm';
+import { PermissionSetEntity } from './entities/permission-set.entity.ts';
+import { RoleEntity } from './entities/role.entity.ts';
 
 @Injectable()
 export class PermissionsService {
@@ -67,5 +66,21 @@ export class PermissionsService {
       await queryRunner.release();
     }
     return null;
+  }
+
+  async validateUserPermissionScope(
+    userId: string,
+    permission: PermissionKey,
+  ): Promise<PermissionScope> {
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    const userPermission = user.permissionSet
+      ? user.permissionSet
+      : user.role.permissionSet;
+
+    if (userPermission[permission]) return userPermission[permission];
+
+    //least privilege fallback
+    return PermissionScope.OWN;
   }
 }

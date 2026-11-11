@@ -4,6 +4,23 @@ export enum PermissionScope {
   OWN = "OWN",
 }
 
+export enum PermissionKey {
+  TransactionCreateScope = "transactionCreateScope",
+  TransactionReadScope = "transactionReadScope",
+  TransactionUpdateScope = "transactionUpdateScope",
+  TransactionDeleteScope = "transactionDeleteScope",
+
+  RoleCreateScope = "roleCreateScope",
+  RoleReadScope = "roleReadScope",
+  RoleUpdateScope = "roleUpdateScope",
+  RoleDeleteScope = "roleDeleteScope",
+
+  UserCreateScope = "userCreateScope",
+  UserReadScope = "userReadScope",
+  UserUpdateScope = "userUpdateScope",
+  UserDeleteScope = "userDeleteScope",
+}
+
 export type PermissionSet = {
   transactionCreateScope: PermissionScope;
   transactionReadScope: PermissionScope;
