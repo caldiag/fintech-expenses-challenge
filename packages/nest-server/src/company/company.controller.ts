@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
 import { PermissionsService } from '../permissions/permissions.service.ts';
-import { toStrictResponseDto } from '../typeorm/dto/strict-response.dto.ts';
 import { UserService } from '../user/user.service.ts';
 import { CompanyService } from './company.service.ts';
 import {
@@ -56,10 +55,7 @@ export class CompanyController {
       if (!user.role) throw new ForbiddenException('A role is required');
       scopedFilters.createdByRoleId = user.role.id;
     }
-    return toStrictResponseDto(
-      CompanyPageResponseDTO,
-      await this.companyService.findAllCompanies(scopedFilters, page),
-    );
+    return this.companyService.findAllCompanies(scopedFilters, page);
   }
 
   @Get(':id')
@@ -78,7 +74,7 @@ export class CompanyController {
     if (!this.canAccess(scope, user.id, user.role?.id, company.createdBy)) {
       throw new ForbiddenException('Cannot read this company');
     }
-    return toStrictResponseDto(CompanyResponseDTO, company);
+    return company;
   }
 
   @Post('create')
@@ -96,10 +92,7 @@ export class CompanyController {
     if (createScope === PermissionScope.ROLE && !user.role) {
       throw new ForbiddenException('A role is required');
     }
-    return toStrictResponseDto(
-      CompanyResponseDTO,
-      await this.companyService.createCompany(company, userId),
-    );
+    return this.companyService.createCompany(company, userId);
   }
 
   @Patch(':id')
@@ -119,10 +112,7 @@ export class CompanyController {
     if (!this.canAccess(scope, user.id, user.role?.id, existing.createdBy)) {
       throw new ForbiddenException('Cannot update this company');
     }
-    return toStrictResponseDto(
-      CompanyResponseDTO,
-      await this.companyService.updateCompany(id, company),
-    );
+    return this.companyService.updateCompany(id, company);
   }
 
   @Delete(':id')

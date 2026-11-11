@@ -693,7 +693,7 @@ export default function CreateTransactionContent({
                   <PopoverTitle>Nova categoria</PopoverTitle>
                   <ButtonGroup
                     aria-label="Ícone e nome da categoria"
-                    className="w-full"
+                    className="w-full gap-1"
                   >
                     <Select.Root
                       value={newCategoryIcon}

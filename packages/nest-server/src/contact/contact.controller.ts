@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
 import { PermissionsService } from '../permissions/permissions.service.ts';
-import { toStrictResponseDto } from '../typeorm/dto/strict-response.dto.ts';
 import { UserService } from '../user/user.service.ts';
 import { ContactService } from './contact.service.ts';
 import {
@@ -56,10 +55,7 @@ export class ContactController {
       if (!user.role) throw new ForbiddenException('A role is required');
       scopedFilters.createdByRoleId = user.role.id;
     }
-    return toStrictResponseDto(
-      ContactPageResponseDTO,
-      await this.contactService.findAllContacts(scopedFilters, page),
-    );
+    return this.contactService.findAllContacts(scopedFilters, page);
   }
 
   @Get(':id')
@@ -78,7 +74,7 @@ export class ContactController {
     if (!this.canAccess(scope, user.id, user.role?.id, contact.createdBy)) {
       throw new ForbiddenException('Cannot read this contact');
     }
-    return toStrictResponseDto(ContactResponseDTO, contact);
+    return contact;
   }
 
   @Post('create')
@@ -96,10 +92,7 @@ export class ContactController {
     if (createScope === PermissionScope.ROLE && !user.role) {
       throw new ForbiddenException('A role is required');
     }
-    return toStrictResponseDto(
-      ContactResponseDTO,
-      await this.contactService.createContact(contact, userId),
-    );
+    return this.contactService.createContact(contact, userId);
   }
 
   @Patch(':id')
@@ -119,10 +112,7 @@ export class ContactController {
     if (!this.canAccess(scope, user.id, user.role?.id, existing.createdBy)) {
       throw new ForbiddenException('Cannot update this contact');
     }
-    return toStrictResponseDto(
-      ContactResponseDTO,
-      await this.contactService.updateContact(id, contact),
-    );
+    return this.contactService.updateContact(id, contact);
   }
 
   @Delete(':id')

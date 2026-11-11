@@ -15,10 +15,6 @@ import {
 } from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
 import { PermissionsService } from '../permissions/permissions.service.ts';
-import {
-  toStrictResponseDto,
-  toStrictResponseDtoArray,
-} from '../typeorm/dto/strict-response.dto.ts';
 import { UserService } from '../user/user.service.ts';
 import CreateTransactionCategoryDTO from './dto/create-transaction-category.dto.ts';
 import CreateTransactionDTO from './dto/create-transaction.dto.ts';
@@ -57,15 +53,12 @@ export class TransactionController {
       throw new ForbiddenException('Cannot create a transaction for this role');
     }
 
-    return toStrictResponseDto(
-      TransactionResponseDTO,
-      await this.transactionService.createTransaction(
-        transactionData,
-        transactionCategoryId,
-        roleId,
-        companyId,
-        userId,
-      ),
+    return this.transactionService.createTransaction(
+      transactionData,
+      transactionCategoryId,
+      roleId,
+      companyId,
+      userId,
     );
   }
 
@@ -100,10 +93,7 @@ export class TransactionController {
         'Cannot assign this transaction to another role',
       );
     }
-    return toStrictResponseDto(
-      TransactionResponseDTO,
-      await this.transactionService.updateTransaction(id, transaction),
-    );
+    return this.transactionService.updateTransaction(id, transaction);
   }
 
   @Delete(':id')
@@ -151,10 +141,7 @@ export class TransactionController {
       filters.createdById = user.id;
     }
 
-    return toStrictResponseDto(
-      TransactionPageResponseDTO,
-      await this.transactionService.findTransactions(filters, page),
-    );
+    return this.transactionService.findTransactions(filters, page);
   }
 
   @Post('category/create')
@@ -162,12 +149,9 @@ export class TransactionController {
     @Body() transactionCategory: CreateTransactionCategoryDTO,
     @UserContext() userId: string,
   ): Promise<TransactionCategoryResponseDTO> {
-    return toStrictResponseDto(
-      TransactionCategoryResponseDTO,
-      await this.transactionService.createTransactionCategory(
-        transactionCategory,
-        userId,
-      ),
+    return this.transactionService.createTransactionCategory(
+      transactionCategory,
+      userId,
     );
   }
 
@@ -175,10 +159,7 @@ export class TransactionController {
   async getAllTransactionCategories(): Promise<
     TransactionCategoryResponseDTO[]
   > {
-    return toStrictResponseDtoArray(
-      TransactionCategoryResponseDTO,
-      await this.transactionService.findAllTransactionCategories(),
-    );
+    return this.transactionService.findAllTransactionCategories();
   }
 
   @Get('category/:id')
@@ -187,9 +168,7 @@ export class TransactionController {
   ): Promise<TransactionCategoryResponseDTO | null> {
     const category =
       await this.transactionService.findTransactionCategoryById(id);
-    return category
-      ? toStrictResponseDto(TransactionCategoryResponseDTO, category)
-      : null;
+    return category;
   }
 
   @Get(':id')
@@ -210,6 +189,6 @@ export class TransactionController {
     ) {
       throw new ForbiddenException('Cannot read this transaction');
     }
-    return toStrictResponseDto(TransactionResponseDTO, transaction);
+    return transaction;
   }
 }

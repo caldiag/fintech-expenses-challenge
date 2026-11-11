@@ -8,10 +8,6 @@ import {
   Post,
 } from '@nestjs/common';
 import { UserContext } from '../auth/guard/context.decorator.ts';
-import {
-  toStrictResponseDto,
-  toStrictResponseDtoArray,
-} from '../typeorm/dto/strict-response.dto.ts';
 import { UserService } from '../user/user.service.ts';
 import { DEFAULT_ROLE_PERMISSION_SET } from './constants/default-permission-set.ts';
 import CreateRoleDTO from './dto/create-role.dto.ts';
@@ -33,17 +29,12 @@ export class RoleController {
     );
 
     if (readScope === PermissionScope.ALL) {
-      return toStrictResponseDtoArray(
-        RoleResponseDTO,
-        await this.permissionsService.findAllRoles(),
-      );
+      return this.permissionsService.findAllRoles();
     }
 
     const user = await this.userService.getUserById(userId);
     if (!user) return [];
-    return user.role
-      ? toStrictResponseDtoArray(RoleResponseDTO, [user.role])
-      : [];
+    return user.role ? [user.role] : [];
   }
 
   @Post('create')
@@ -69,6 +60,6 @@ export class RoleController {
       throw new InternalServerErrorException('Failed to create role');
     }
 
-    return toStrictResponseDto(RoleResponseDTO, createdRole);
+    return createdRole;
   }
 }
