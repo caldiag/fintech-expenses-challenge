@@ -2,6 +2,7 @@ import { Currency } from "@app/types"
 import { Select } from "@base-ui/react/select"
 import {
   IconBriefcase,
+  IconBuilding,
   IconCar,
   IconChevronDown,
   IconDeviceFloppy,
@@ -16,6 +17,7 @@ import {
 } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
 import axiosClient from "~/auth/axios-client"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import {
   convertCurrencyAmount,
   currencies,
@@ -47,6 +49,12 @@ type TransactionRole = {
   id: string
   name: string
   icon: string
+}
+
+type TransactionCompany = {
+  id: string
+  name: string
+  websiteUrl: string
 }
 
 const ADD_CATEGORY_VALUE = "__add-category__"
@@ -91,12 +99,17 @@ export default function CreateTransactionContent({
   const [description, setDescription] = useState("")
   const [categories, setCategories] = useState<TransactionCategory[]>([])
   const [roles, setRoles] = useState<TransactionRole[]>([])
+  const [companies, setCompanies] = useState<TransactionCompany[]>([])
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null
   )
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
+    null
+  )
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [isLoadingRoles, setIsLoadingRoles] = useState(true)
+  const [isLoadingCompanies, setIsLoadingCompanies] = useState(true)
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
   const [newCategoryIcon, setNewCategoryIcon] =
@@ -111,6 +124,9 @@ export default function CreateTransactionContent({
     (category) => category.id === selectedCategoryId
   )
   const selectedRole = roles.find((role) => role.id === selectedRoleId)
+  const selectedCompany = companies.find(
+    (company) => company.id === selectedCompanyId
+  )
 
   useEffect(() => {
     let active = true
@@ -139,8 +155,21 @@ export default function CreateTransactionContent({
       }
     }
 
+    async function loadCompanies() {
+      try {
+        const response =
+          await axiosClient.get<TransactionCompany[]>("/company/all")
+        if (active) setCompanies(response.data)
+      } catch {
+        if (active) setError("Não foi possível carregar as empresas.")
+      } finally {
+        if (active) setIsLoadingCompanies(false)
+      }
+    }
+
     void loadCategories()
     void loadRoles()
+    void loadCompanies()
 
     return () => {
       active = false
@@ -183,6 +212,10 @@ export default function CreateTransactionContent({
       setError("Selecione um setor.")
       return
     }
+    if (!selectedCompanyId) {
+      setError("Selecione uma empresa.")
+      return
+    }
 
     const totalCents = Number.parseInt(amountDigits, 10)
     if (!Number.isFinite(totalCents) || totalCents <= 0) {
@@ -200,6 +233,7 @@ export default function CreateTransactionContent({
         currency,
         transactionCategoryId: selectedCategoryId,
         roleId: selectedRoleId,
+        companyId: selectedCompanyId,
       })
       onCreated()
     } catch {
@@ -216,6 +250,97 @@ export default function CreateTransactionContent({
       </DialogHeader>
       <form onSubmit={submitTransaction}>
         <FieldGroup>
+          <FieldSet className="grid grid-cols-1 gap-3">
+            <div>
+              <FieldLabel htmlFor="transaction-company">Empresa</FieldLabel>
+              <Select.Root
+                value={selectedCompanyId}
+                onValueChange={(value) => {
+                  setSelectedCompanyId(value)
+                  setError(null)
+                }}
+              >
+                <Select.Trigger
+                  id="transaction-company"
+                  className="flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-input/20 px-2 text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                >
+                  <Select.Value className="min-w-0 flex-1 text-left">
+                    {selectedCompany ? (
+                      <span className="flex min-w-0 items-center gap-2">
+                        <Avatar className="size-4 shrink-0 rounded-none after:hidden">
+                          <AvatarImage
+                            src={
+                              "https://" +
+                              selectedCompany.websiteUrl
+                                .replace("https://", "")
+                                .replace("http://", "") +
+                              "/favicon.ico"
+                            }
+                            className="rounded-none"
+                          />
+                          <AvatarFallback className="rounded-none text-sm">
+                            <IconBuilding />
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{selectedCompany.name}</span>
+                      </span>
+                    ) : isLoadingCompanies ? (
+                      "Carregando empresas..."
+                    ) : (
+                      "Selecione uma empresa"
+                    )}
+                  </Select.Value>
+                  <Select.Icon>
+                    <IconChevronDown className="size-3" />
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner
+                    sideOffset={4}
+                    className="z-50 outline-none"
+                  >
+                    <Select.Popup className="max-h-(--available-height) min-w-56 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                      <Select.List>
+                        {companies.map((company) => (
+                          <Select.Item
+                            key={company.id}
+                            value={company.id}
+                            className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                          >
+                            <Select.ItemText>
+                              <span className="flex min-w-0 items-center gap-2">
+                                <Avatar className="size-4 shrink-0 rounded-none after:hidden">
+                                  <AvatarImage
+                                    src={
+                                      "https://" +
+                                      company.websiteUrl
+                                        .replace("https://", "")
+                                        .replace("http://", "") +
+                                      "/favicon.ico"
+                                    }
+                                    className="rounded-none"
+                                  />
+                                  <AvatarFallback className="rounded-none text-sm">
+                                    <IconBuilding />
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="truncate">{company.name}</span>
+                              </span>
+                            </Select.ItemText>
+                          </Select.Item>
+                        ))}
+                      </Select.List>
+                      {!companies.length && !isLoadingCompanies && (
+                        <p className="px-2 py-1 text-muted-foreground">
+                          Nenhuma empresa cadastrada
+                        </p>
+                      )}
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select.Root>
+            </div>
+          </FieldSet>
           <FieldSet className="grid grid-cols-1 gap-3">
             <div>
               <FieldLabel htmlFor="transaction-description">

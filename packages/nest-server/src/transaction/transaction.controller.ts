@@ -32,7 +32,8 @@ export class TransactionController {
     @Body() transaction: CreateTransactionDTO,
     @UserContext() userId: string,
   ): Promise<TransactionEntity> {
-    const { roleId, transactionCategoryId, ...transactionData } = transaction;
+    const { roleId, transactionCategoryId, companyId, ...transactionData } =
+      transaction;
     const user = await this.userService.getUserById(userId);
     if (!user) throw new BadRequestException('User not found');
 
@@ -49,6 +50,7 @@ export class TransactionController {
       transactionData,
       transactionCategoryId,
       roleId,
+      companyId,
       userId,
     );
   }

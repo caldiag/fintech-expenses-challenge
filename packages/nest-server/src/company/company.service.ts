@@ -11,6 +11,10 @@ export class CompanyService {
     private readonly companyRepository: Repository<CompanyEntity>,
   ) {}
 
+  async findAllCompanies(): Promise<CompanyEntity[]> {
+    return await this.companyRepository.find();
+  }
+
   async createCompany(
     company: CreateCompanyDTO,
     createdByUserId: string,

@@ -22,16 +22,18 @@ export class TransactionService {
   async createTransaction(
     transaction: Omit<
       CreateTransactionDTO,
-      'id' | 'roleId' | 'transactionCategoryId'
+      'id' | 'roleId' | 'transactionCategoryId' | 'companyId'
     >,
     transactionCategoryId: string,
     roleId: string,
+    companyId: string,
     createdByUserId: string,
   ): Promise<TransactionEntity> {
     return await this.transactionRepository.save({
       ...transaction,
       transactionCategory: { id: transactionCategoryId },
       role: { id: roleId },
+      company: { id: companyId },
       createdBy: { id: createdByUserId },
     });
   }
