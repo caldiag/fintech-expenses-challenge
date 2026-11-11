@@ -1,7 +1,6 @@
 import type { SortDirection } from "@app/types"
-import { IconCircleDotted } from "@tabler/icons-react"
+import { IconCubePlus } from "@tabler/icons-react"
 import type { ReactNode } from "react"
-import CreateDialog from "../create/create-dialog"
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty"
 import {
   Table,
@@ -61,11 +60,12 @@ export default function RecordTable({
               <TableCell colSpan={columnKeys.length} className="text-center">
                 <Empty>
                   <EmptyMedia>
-                    <IconCircleDotted />
+                    <IconCubePlus />
                   </EmptyMedia>
                   <EmptyTitle>Ainda não há nada aqui</EmptyTitle>
                   <EmptyDescription>
-                    <CreateDialog />
+                    Clique em "Novo registro" no menu superior para adicionar um
+                    registro
                   </EmptyDescription>
                 </Empty>
               </TableCell>
