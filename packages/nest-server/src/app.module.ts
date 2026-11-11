@@ -12,6 +12,7 @@ import { AppDataSource } from './typeorm/datasource.ts';
 import { ContactModule } from './contact/contact.module.js';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard.ts';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AuthGuard } from './auth/guard/auth.guard.ts';
     ContactModule,
     CompanyModule,
     PermissionsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
