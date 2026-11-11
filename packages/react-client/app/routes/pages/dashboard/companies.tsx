@@ -1,14 +1,21 @@
 import { SortDirection } from "@app/types"
 import { IconArrowUpRight } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router"
 import axiosClient from "~/auth/axios-client"
+import CreateCompanyContent from "~/components/create/create-company-content"
 import CompanyCustomCell from "~/components/data-display/custom-cell/company-custom-cell"
-import RecordTable from "~/components/data-display/record-table"
+import RecordTable, {
+  type RecordTableFilter,
+} from "~/components/data-display/record-table"
 import { Button } from "~/components/ui/button"
+import { Dialog } from "~/components/ui/dialog"
 import { useDashboardRefresh } from "~/hooks/use-dashboard-refresh"
 import { getTablerIcon } from "~/lib/utils/tabler-icons"
+import { AppRoutes } from "~/routes"
 
 type Company = {
+  id: string
   name: string
   websiteUrl: string
   email: string | null
@@ -21,6 +28,8 @@ type CompaniesResponse = {
 }
 
 export default function Companies() {
+  const navigate = useNavigate()
+  const { id: companyId } = useParams()
   const [tableData, setTableData] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -28,12 +37,23 @@ export default function Companies() {
     SortDirection.DESC
   )
   const [sortBy, setSortBy] = useState<string>("date")
-  const { refreshKey } = useDashboardRefresh()
+  const [filters, setFilters] = useState<RecordTableFilter[]>([])
+  const { refreshKey, refreshView } = useDashboardRefresh()
 
   useEffect(() => {
+    const params: Record<string, string | number> = { page: currentPage }
+    filters.forEach((filter) => {
+      if (filter.key === "createdAt") {
+        params.fromDate = filter.value
+        params.toDate = `${filter.valueTo}T23:59:59.999Z`
+      } else {
+        params[filter.key] = filter.value
+      }
+    })
+
     axiosClient
       .get<CompaniesResponse>("/company/all", {
-        params: { page: currentPage },
+        params,
       })
       .then(({ data }) => {
         setTableData(
@@ -45,12 +65,13 @@ export default function Companies() {
         )
         setTotalPages(data.totalPages)
       })
-  }, [currentPage, refreshKey])
+  }, [currentPage, filters, refreshKey])
 
   return (
     <div className="w-fill">
       <RecordTable
         data={tableData}
+        onRowClick={(item) => navigate(`${AppRoutes.Companies}/${item.id}`)}
         columnKeys={[
           {
             key: "name",
@@ -68,7 +89,8 @@ export default function Companies() {
             customComponent: (children, item) => (
               <Button
                 size="sm"
-                onClick={() => {
+                onClick={(event) => {
+                  event.stopPropagation()
                   window.open(
                     "http://" +
                       item.websiteUrl
@@ -95,11 +117,39 @@ export default function Companies() {
         totalPages={totalPages}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
+        filterableColumnKeys={[
+          { key: "name", label: "Nome", type: "text" },
+          { key: "email", label: "E-mail", type: "text" },
+          { key: "websiteUrl", label: "Site da empresa", type: "text" },
+          { key: "areaCode", label: "CEP", type: "text" },
+          { key: "phone", label: "Telefone", type: "text" },
+          { key: "createdAt", label: "Data de cadastro", type: "dateRange" },
+        ]}
+        onFiltersChange={(nextFilters) => {
+          setCurrentPage(0)
+          setFilters(nextFilters)
+        }}
         setColumnSortDirection={(key, dir) => {
           setSortBy(key)
           setSortDirection(dir)
         }}
       />
+      <Dialog
+        open={Boolean(companyId)}
+        onOpenChange={(open) => {
+          if (!open) navigate(AppRoutes.Companies, { replace: true })
+        }}
+      >
+        {companyId && (
+          <CreateCompanyContent
+            recordId={companyId}
+            onCreated={() => {
+              refreshView()
+              navigate(AppRoutes.Companies, { replace: true })
+            }}
+          />
+        )}
+      </Dialog>
     </div>
   )
 }
