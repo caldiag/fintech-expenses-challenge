@@ -14,7 +14,8 @@ import { UserEntity } from '../../user/entities/user.entity.ts';
 import { TransactionCategoryEntity } from './transaction-category.entity.ts';
 
 @Entity()
-@Check('CHK_transaction_amount_cents_max', '"amountCents" <= 99')
+@Check('CHK_transaction_amount_nonnegative', '"amount" >= 0')
+@Check('CHK_transaction_amount_cents_range', '"amountCents" BETWEEN 0 AND 99')
 export class TransactionEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
