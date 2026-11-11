@@ -1,11 +1,13 @@
 import {
+  IconBuilding,
   IconCheck,
   IconChevronDown,
   IconDeviceFloppy,
 } from "@tabler/icons-react"
 import { useRef, useState } from "react"
-import { usePaginatedCompanies } from "~/hooks/use-paginated-companies"
 import axiosClient from "~/auth/axios-client"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { usePaginatedCompanies } from "~/hooks/use-paginated-companies"
 import { Button } from "../ui/button"
 import {
   DialogContent,
@@ -15,7 +17,7 @@ import {
 } from "../ui/dialog"
 import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
-import { Popover, PopoverContent } from "../ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
 export default function CreateContactContent({
   onCreated,
@@ -127,24 +129,28 @@ export default function CreateContactContent({
             <div className="sm:col-span-2">
               <FieldLabel htmlFor="contact-companies">Empresas</FieldLabel>
               <Popover open={isCompaniesOpen} onOpenChange={setIsCompaniesOpen}>
-                <Button
-                  ref={companiesTriggerRef}
-                  id="contact-companies"
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-between"
-                  aria-haspopup="listbox"
-                  aria-expanded={isCompaniesOpen}
-                >
-                  <span className="truncate">
-                    {selectedCompanyIds.length
-                      ? `${selectedCompanyIds.length} empresa(s) selecionada(s)`
-                      : isLoadingCompanies
-                        ? "Carregando empresas..."
-                        : "Selecione as empresas"}
-                  </span>
-                  <IconChevronDown />
-                </Button>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      ref={companiesTriggerRef}
+                      id="contact-companies"
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-between"
+                      aria-haspopup="listbox"
+                      aria-expanded={isCompaniesOpen}
+                    >
+                      <span className="truncate">
+                        {selectedCompanyIds.length
+                          ? `${selectedCompanyIds.length} empresa(s) selecionada(s)`
+                          : isLoadingCompanies
+                            ? "Carregando empresas..."
+                            : "Selecione as empresas"}
+                      </span>
+                      <IconChevronDown />
+                    </Button>
+                  }
+                />
                 <PopoverContent
                   anchor={companiesTriggerRef}
                   align="start"
@@ -164,7 +170,24 @@ export default function CreateContactContent({
                           aria-selected={isSelected}
                           onClick={() => toggleCompany(company.id)}
                         >
-                          {company.name}
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Avatar className="size-4 shrink-0 rounded-none after:hidden">
+                              <AvatarImage
+                                src={
+                                  "https://" +
+                                  company.websiteUrl
+                                    .replace("https://", "")
+                                    .replace("http://", "") +
+                                  "/favicon.ico"
+                                }
+                                className="rounded-none"
+                              />
+                              <AvatarFallback className="rounded-none text-sm">
+                                <IconBuilding />
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate">{company.name}</span>
+                          </span>
                           {isSelected && <IconCheck />}
                         </Button>
                       )
