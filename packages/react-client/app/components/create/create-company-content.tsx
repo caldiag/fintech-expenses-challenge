@@ -1,12 +1,16 @@
+import { PermissionKey } from "@app/types"
 import {
   IconCheck,
   IconChevronDown,
   IconDeviceFloppy,
 } from "@tabler/icons-react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useForm } from "react-hook-form"
 import axiosClient from "~/auth/axios-client"
+import { useAuthContext } from "~/auth/hooks/useAuthContext"
 import { toast } from "~/components/ui/toast"
 import { usePaginatedContacts } from "~/hooks/use-paginated-contacts"
+import { hasRecordScopeAccess } from "~/lib/utils/record-permissions"
 import { Button } from "../ui/button"
 import {
   DialogContent,
@@ -18,17 +22,37 @@ import { FieldGroup, FieldLabel, FieldSet } from "../ui/field"
 import { Input } from "../ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
+type CompanyFormValues = {
+  name: string
+  websiteUrl: string
+  areaCode: string
+  email: string
+  phone: string
+  contactIds: string[]
+}
+
 export default function CreateCompanyContent({
   onCreated,
+  recordId,
 }: {
   onCreated: () => void
+  recordId?: string
 }) {
-  const [name, setName] = useState("")
-  const [websiteUrl, setWebsiteUrl] = useState("")
-  const [areaCode, setAreaCode] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([])
+  const { authContext } = useAuthContext()
+  const { handleSubmit, register, reset, setValue, watch } =
+    useForm<CompanyFormValues>({
+      defaultValues: {
+        name: "",
+        websiteUrl: "",
+        areaCode: "",
+        email: "",
+        phone: "",
+        contactIds: [],
+      },
+    })
+  const selectedContactIds = watch("contactIds")
+  const [editingRecord, setEditingRecord] = useState<any>()
+  const [isLoadingRecord, setIsLoadingRecord] = useState(Boolean(recordId))
   const [isContactsOpen, setIsContactsOpen] = useState(false)
   const [isSavingCompany, setIsSavingCompany] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,6 +63,53 @@ export default function CreateCompanyContent({
     isLoading: isLoadingContacts,
     loadNextPage: loadNextContactPage,
   } = usePaginatedContacts()
+  const canEdit =
+    !recordId ||
+    hasRecordScopeAccess(
+      authContext?.permissionSet[PermissionKey.CompanyUpdateScope],
+      authContext,
+      editingRecord
+    )
+  const canDelete =
+    Boolean(recordId) &&
+    hasRecordScopeAccess(
+      authContext?.permissionSet[PermissionKey.CompanyDeleteScope],
+      authContext,
+      editingRecord
+    )
+
+  useEffect(() => {
+    if (!recordId) return
+    let active = true
+    setEditingRecord(undefined)
+    setError(null)
+    setIsLoadingRecord(true)
+    axiosClient
+      .get(`/company/${recordId}`)
+      .then(({ data }) => {
+        if (!active) return
+        setEditingRecord(data)
+        reset({
+          name: data.name,
+          websiteUrl: data.websiteUrl,
+          areaCode: data.areaCode ?? "",
+          email: data.email ?? "",
+          phone: data.phone ?? "",
+          contactIds: data.contacts.map(
+            (contact: { id: string }) => contact.id
+          ),
+        })
+      })
+      .catch(() => {
+        if (active) setError("Não foi possível carregar a empresa.")
+      })
+      .finally(() => {
+        if (active) setIsLoadingRecord(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [recordId, reset])
 
   function handleContactsScroll(event: React.UIEvent<HTMLDivElement>) {
     const { scrollTop, clientHeight, scrollHeight } = event.currentTarget
@@ -48,30 +119,38 @@ export default function CreateCompanyContent({
   }
 
   function toggleContact(contactId: string) {
-    setSelectedContactIds((current) =>
-      current.includes(contactId)
-        ? current.filter((id) => id !== contactId)
-        : [...current, contactId]
+    setValue(
+      "contactIds",
+      selectedContactIds.includes(contactId)
+        ? selectedContactIds.filter((id) => id !== contactId)
+        : [...selectedContactIds, contactId],
+      { shouldDirty: true }
     )
   }
 
-  async function submitCompany(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function submitCompany(values: CompanyFormValues) {
     setError(null)
     setIsSavingCompany(true)
     try {
-      await axiosClient.post("/company/create", {
-        name: name.trim(),
-        websiteUrl: websiteUrl.trim(),
-        areaCode: areaCode.trim() || null,
-        email: email.trim() || null,
-        phone: phone.trim() || null,
-        contactIds: selectedContactIds,
-      })
+      const payload = {
+        name: values.name.trim(),
+        websiteUrl: values.websiteUrl.trim(),
+        areaCode: values.areaCode.trim() || null,
+        email: values.email.trim() || null,
+        phone: values.phone.trim() || null,
+        contactIds: values.contactIds,
+      }
+      if (recordId) {
+        await axiosClient.patch(`/company/${recordId}`, payload)
+      } else {
+        await axiosClient.post("/company/create", payload)
+      }
       toast.add({
         type: "success",
         title: "Sucesso",
-        description: "Empresa criada com sucesso.",
+        description: recordId
+          ? "Empresa atualizada com sucesso."
+          : "Empresa criada com sucesso.",
       })
       onCreated()
     } catch {
@@ -81,32 +160,49 @@ export default function CreateCompanyContent({
     }
   }
 
+  async function deleteCompany() {
+    if (!recordId || !window.confirm("Excluir esta empresa?")) return
+    try {
+      await axiosClient.delete(`/company/${recordId}`)
+      toast.add({
+        type: "success",
+        title: "Sucesso",
+        description: "Empresa excluída com sucesso.",
+      })
+      onCreated()
+    } catch {
+      setError("Não foi possível excluir a empresa.")
+    }
+  }
+
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Nova empresa</DialogTitle>
+        <DialogTitle>
+          {recordId ? "Editar empresa" : "Nova empresa"}
+        </DialogTitle>
       </DialogHeader>
-      <form onSubmit={submitCompany}>
+      <form onSubmit={handleSubmit(submitCompany)}>
         <FieldGroup>
           <FieldSet className="grid grid-cols-1 gap-3">
             <div>
               <FieldLabel htmlFor="company-name">Nome</FieldLabel>
               <Input
+                {...register("name", { required: true })}
                 id="company-name"
                 placeholder="Nome da empresa"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
+                disabled={!canEdit}
                 required
               />
             </div>
             <div>
               <FieldLabel htmlFor="company-website">Site</FieldLabel>
               <Input
+                {...register("websiteUrl", { required: true })}
                 id="company-website"
                 type="url"
                 placeholder="https://exemplo.com"
-                value={websiteUrl}
-                onChange={(event) => setWebsiteUrl(event.target.value)}
+                disabled={!canEdit}
                 required
               />
             </div>
@@ -117,31 +213,31 @@ export default function CreateCompanyContent({
                 Código de área
               </FieldLabel>
               <Input
+                {...register("areaCode")}
                 id="company-area-code"
                 type="tel"
                 placeholder="11"
-                value={areaCode}
-                onChange={(event) => setAreaCode(event.target.value)}
+                disabled={!canEdit}
               />
             </div>
             <div>
               <FieldLabel htmlFor="company-phone">Telefone</FieldLabel>
               <Input
+                {...register("phone")}
                 id="company-phone"
                 type="tel"
                 placeholder="99999-9999"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
+                disabled={!canEdit}
               />
             </div>
             <div className="sm:col-span-2">
               <FieldLabel htmlFor="company-email">E-mail</FieldLabel>
               <Input
+                {...register("email")}
                 id="company-email"
                 type="email"
                 placeholder="contato@exemplo.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                disabled={!canEdit}
               />
             </div>
             <div className="sm:col-span-2">
@@ -157,6 +253,7 @@ export default function CreateCompanyContent({
                       className="w-full justify-between"
                       aria-haspopup="listbox"
                       aria-expanded={isContactsOpen}
+                      disabled={!canEdit}
                     >
                       <span className="truncate">
                         {selectedContactIds.length
@@ -186,6 +283,7 @@ export default function CreateCompanyContent({
                           className="w-full justify-between"
                           role="option"
                           aria-selected={isSelected}
+                          disabled={!canEdit}
                           onClick={() => toggleContact(contact.id)}
                         >
                           {contact.name}
@@ -223,10 +321,22 @@ export default function CreateCompanyContent({
           )}
         </FieldGroup>
         <DialogFooter className="mt-4">
-          <Button type="submit" disabled={isSavingCompany}>
-            <IconDeviceFloppy />
-            {isSavingCompany ? "Salvando..." : "Salvar"}
-          </Button>
+          {isLoadingRecord && <span>Carregando empresa...</span>}
+          {canDelete && (
+            <Button type="button" variant="destructive" onClick={deleteCompany}>
+              Excluir
+            </Button>
+          )}
+          {canEdit && (
+            <Button type="submit" disabled={isSavingCompany || isLoadingRecord}>
+              <IconDeviceFloppy />
+              {isSavingCompany
+                ? "Salvando..."
+                : recordId
+                  ? "Salvar alterações"
+                  : "Salvar"}
+            </Button>
+          )}
         </DialogFooter>
       </form>
     </DialogContent>

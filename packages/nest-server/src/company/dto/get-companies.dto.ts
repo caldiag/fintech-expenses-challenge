@@ -6,6 +6,10 @@ export default class GetCompaniesDTO {
   createdById?: string;
 
   @IsOptional()
+  @IsUUID('4')
+  createdByRoleId?: string;
+
+  @IsOptional()
   @IsDateString()
   fromDate?: string;
 
