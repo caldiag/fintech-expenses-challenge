@@ -1,5 +1,5 @@
-import { Currency } from '@app/types';
-import { IsNumber, IsString } from 'class-validator';
+import { Currency, TransactionDirection } from '@app/types';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
 
 export default class CreateTransactionDTO {
   @IsString()
@@ -13,6 +13,9 @@ export default class CreateTransactionDTO {
 
   @IsString()
   currency: Currency;
+
+  @IsEnum(TransactionDirection)
+  transactionDirection: TransactionDirection;
 
   @IsString()
   transactionCategoryId: string;

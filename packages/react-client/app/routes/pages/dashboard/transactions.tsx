@@ -1,10 +1,12 @@
-import { SortDirection } from "@app/types"
-import { IconUser } from "@tabler/icons-react"
+import { SortDirection, TransactionDirection } from "@app/types"
+import { IconArrowDown, IconArrowUp } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
 import axiosClient from "~/auth/axios-client"
+import CompanyCustomCell from "~/components/data-display/custom-cell/company"
 import RecordTable from "~/components/data-display/record-table"
-import { Button } from "~/components/ui/button"
+import { getCurrencySymbol } from "~/lib/utils/currency"
 import { formatSmart } from "~/lib/utils/format-date"
+import { getTablerIcon } from "~/lib/utils/tabler-icons"
 
 export default function Transactions() {
   const [tableData, setTableData] = useState<any[]>([])
@@ -33,18 +35,70 @@ export default function Transactions() {
       <RecordTable
         data={tableData}
         columnKeys={[
-          { key: "date", label: "Data" },
-          { key: "amount", label: "Valor" },
-          { key: "description", label: "Descrição" },
-          { key: "category", label: "Categoria" },
           {
-            key: "createdBy",
-            label: "Criado por",
-            customComponent: (children) => (
-              <Button variant="ghost">
-                <IconUser /> {children}
-              </Button>
+            key: "company",
+            label: "Empresa",
+            icon: getTablerIcon("IconBuilding"),
+            customComponent: (children, item) => (
+              <CompanyCustomCell children={children} item={item.company} />
             ),
+          },
+          {
+            key: "amount",
+            label: "Valor",
+            icon: getTablerIcon("IconCurrencyDollar"),
+          },
+          {
+            key: "transactionDirection",
+            label: "Tipo",
+            icon: getTablerIcon("IconArrowUpDown"),
+            customComponent: (children, item) => (
+              <div className="flex items-center gap-2">
+                <div
+                  className={`flex h-4 w-4 items-center justify-center rounded-lg ${item.transactionDirection === "Entrada" ? "bg-green-100 text-green-900" : "bg-red-100 text-red-900"}`}
+                >
+                  {item.transactionDirection === "Entrada" ? (
+                    <IconArrowDown size={12} />
+                  ) : (
+                    <IconArrowUp size={12} />
+                  )}
+                </div>
+                {children}
+              </div>
+            ),
+          },
+          {
+            key: "category",
+            label: "Categoria",
+            icon: getTablerIcon("IconCategory"),
+            customComponent: (children, item) => {
+              const CategoryIcon = getTablerIcon(item.category?.icon)
+              return (
+                <div className="flex items-center gap-1">
+                  <CategoryIcon size={12} />
+                  {children}
+                </div>
+              )
+            },
+          },
+          {
+            key: "role",
+            label: "Setor",
+            icon: getTablerIcon("IconId"),
+            customComponent: (children, item) => {
+              const CategoryIcon = getTablerIcon(item.role.icon)
+              return (
+                <div className="flex items-center gap-1">
+                  <CategoryIcon size={12} />
+                  {item.role.name}
+                </div>
+              )
+            },
+          },
+          {
+            key: "date",
+            label: "Data",
+            icon: getTablerIcon("IconCalendarEvent"),
           },
         ]}
         sortableColumnKeys={["date", "amount", "description", "category"]}
@@ -63,10 +117,15 @@ export default function Transactions() {
 
 function parseTableData(data: any) {
   return {
+    transactionDirection:
+      data.transactionDirection === TransactionDirection.Inbound
+        ? "Entrada"
+        : "Saída",
     date: formatSmart(new Date(data.createdAt)),
-    amount: data.amount + "," + data.amountCents,
-    description: data.description,
+    amount:
+      getCurrencySymbol(data.currency) + data.amount + "," + data.amountCents,
     category: data.transactionCategory.name,
-    createdBy: `${data.createdBy.firstName} ${data.createdBy.lastName}`,
+    role: data.role,
+    company: data.company.name,
   }
 }

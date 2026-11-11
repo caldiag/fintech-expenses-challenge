@@ -1,4 +1,4 @@
-import { Currency } from '@app/types';
+import { Currency, TransactionDirection } from '@app/types';
 import {
   IsEnum,
   IsNumber,
@@ -27,6 +27,10 @@ export default class GetTransactionsDTO extends FilteredFindDTO {
   @IsEnum(Currency)
   @IsOptional()
   currency?: Currency;
+
+  @IsEnum(TransactionDirection)
+  @IsOptional()
+  transactionDirection?: TransactionDirection;
 
   @IsUUID('4')
   @IsOptional()

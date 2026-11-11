@@ -1,4 +1,4 @@
-import { Currency } from '@app/types';
+import { Currency, TransactionDirection } from '@app/types';
 import type { Relation } from 'typeorm';
 import {
   Check,
@@ -30,6 +30,13 @@ export class TransactionEntity extends BaseEntity {
 
   @Column('varchar')
   description: string;
+
+  @Column({
+    type: 'enum',
+    enum: TransactionDirection,
+    enumName: 'transactionDirection',
+  })
+  transactionDirection: TransactionDirection;
 
   @ManyToOne(
     () => TransactionCategoryEntity,

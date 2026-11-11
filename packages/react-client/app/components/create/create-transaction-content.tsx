@@ -1,19 +1,10 @@
-import { Currency } from "@app/types"
+import { Currency, TransactionDirection } from "@app/types"
 import { Select } from "@base-ui/react/select"
 import {
-  IconBriefcase,
   IconBuilding,
-  IconCar,
   IconChevronDown,
   IconDeviceFloppy,
-  IconDeviceMobile,
-  IconHome,
-  IconPlane,
   IconPlus,
-  IconShoppingBag,
-  IconTag,
-  IconToolsKitchen2,
-  IconUser,
 } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
 import axiosClient from "~/auth/axios-client"
@@ -27,6 +18,7 @@ import {
   getCurrencySymbol,
   normalizeAmountDigits,
 } from "~/lib/utils/currency"
+import { getTablerIcon } from "~/lib/utils/tabler-icons"
 import { Button } from "../ui/button"
 import { ButtonGroup } from "../ui/button-group"
 import {
@@ -54,18 +46,6 @@ type TransactionRole = {
 
 const ADD_CATEGORY_VALUE = "__add-category__"
 
-const CATEGORY_ICON_MAP = {
-  IconBriefcase,
-  IconCar,
-  IconDeviceMobile,
-  IconHome,
-  IconPlane,
-  IconShoppingBag,
-  IconTag,
-  IconToolsKitchen2,
-  IconUser,
-}
-
 const CATEGORY_ICON_OPTIONS = [
   { name: "IconTag", label: "Tag" },
   { name: "IconUser", label: "Pessoa" },
@@ -78,11 +58,7 @@ const CATEGORY_ICON_OPTIONS = [
   { name: "IconPlane", label: "Viagem" },
 ] as const
 
-type CategoryIconName = keyof typeof CATEGORY_ICON_MAP
-
-function getIcon(iconName: string) {
-  return CATEGORY_ICON_MAP[iconName as CategoryIconName] ?? IconTag
-}
+type CategoryIconName = (typeof CATEGORY_ICON_OPTIONS)[number]["name"]
 
 export default function CreateTransactionContent({
   onCreated,
@@ -90,6 +66,8 @@ export default function CreateTransactionContent({
   onCreated: () => void
 }) {
   const [currency, setCurrency] = useState<Currency>(Currency.BRL)
+  const [transactionDirection, setTransactionDirection] =
+    useState<TransactionDirection>(TransactionDirection.Outbound)
   const [amountDigits, setAmountDigits] = useState("")
   const [description, setDescription] = useState("")
   const [categories, setCategories] = useState<TransactionCategory[]>([])
@@ -224,6 +202,7 @@ export default function CreateTransactionContent({
         amount: Math.floor(totalCents / 100),
         amountCents: totalCents % 100,
         currency,
+        transactionDirection,
         transactionCategoryId: selectedCategoryId,
         roleId: selectedRoleId,
         companyId: selectedCompanyId,
@@ -365,6 +344,56 @@ export default function CreateTransactionContent({
           </FieldSet>
           <FieldSet className="grid grid-cols-1 gap-3">
             <div>
+              <FieldLabel htmlFor="transaction-direction">Tipo</FieldLabel>
+              <Select.Root
+                value={transactionDirection}
+                onValueChange={(value) => {
+                  if (value) {
+                    setTransactionDirection(value as TransactionDirection)
+                  }
+                }}
+              >
+                <Select.Trigger
+                  id="transaction-direction"
+                  className="flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-input/20 px-2 text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+                >
+                  <Select.Value>
+                    {transactionDirection === TransactionDirection.Inbound
+                      ? "Entrada"
+                      : "Saída"}
+                  </Select.Value>
+                  <Select.Icon>
+                    <IconChevronDown className="size-3" />
+                  </Select.Icon>
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner
+                    sideOffset={4}
+                    className="z-50 outline-none"
+                  >
+                    <Select.Popup className="min-w-40 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                      <Select.List>
+                        <Select.Item
+                          value={TransactionDirection.Outbound}
+                          className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                        >
+                          <Select.ItemText>Saída</Select.ItemText>
+                        </Select.Item>
+                        <Select.Item
+                          value={TransactionDirection.Inbound}
+                          className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                        >
+                          <Select.ItemText>Entrada</Select.ItemText>
+                        </Select.Item>
+                      </Select.List>
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select.Root>
+            </div>
+          </FieldSet>
+          <FieldSet className="grid grid-cols-1 gap-3">
+            <div>
               <FieldLabel htmlFor="transaction-amount">Valor</FieldLabel>
               <ButtonGroup aria-label="Valor da transação" className="w-full">
                 <Select.Root
@@ -471,7 +500,9 @@ export default function CreateTransactionContent({
                     {selectedCategory ? (
                       <span className="flex min-w-0 items-center gap-2">
                         {(() => {
-                          const CategoryIcon = getIcon(selectedCategory.icon)
+                          const CategoryIcon = getTablerIcon(
+                            selectedCategory.icon
+                          )
                           return <CategoryIcon className="size-4 shrink-0" />
                         })()}
                         <span className="truncate">
@@ -507,7 +538,7 @@ export default function CreateTransactionContent({
                           </Select.ItemText>
                         </Select.Item>
                         {categories.map((category) => {
-                          const CategoryIcon = getIcon(category.icon)
+                          const CategoryIcon = getTablerIcon(category.icon)
                           return (
                             <Select.Item
                               key={category.id}
@@ -555,7 +586,7 @@ export default function CreateTransactionContent({
                         className="flex h-7 w-12 shrink-0 items-center justify-center gap-1 rounded-md border border-input bg-input/20 px-2 outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
                       >
                         {(() => {
-                          const SelectedIcon = getIcon(newCategoryIcon)
+                          const SelectedIcon = getTablerIcon(newCategoryIcon)
                           return <SelectedIcon className="size-4" />
                         })()}
                         <Select.Icon>
@@ -570,7 +601,7 @@ export default function CreateTransactionContent({
                           <Select.Popup className="max-h-56 min-w-40 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
                             <Select.List>
                               {CATEGORY_ICON_OPTIONS.map((option) => {
-                                const OptionIcon = getIcon(option.name)
+                                const OptionIcon = getTablerIcon(option.name)
                                 return (
                                   <Select.Item
                                     key={option.name}
@@ -636,7 +667,7 @@ export default function CreateTransactionContent({
                     {selectedRole ? (
                       <span className="flex min-w-0 items-center gap-2">
                         {(() => {
-                          const RoleIcon = getIcon(selectedRole.icon)
+                          const RoleIcon = getTablerIcon(selectedRole.icon)
                           return <RoleIcon className="size-4 shrink-0" />
                         })()}
                         <span className="truncate">{selectedRole.name}</span>
@@ -659,7 +690,7 @@ export default function CreateTransactionContent({
                     <Select.Popup className="min-w-48 rounded-md border bg-popover p-2 text-popover-foreground shadow-md">
                       <Select.List>
                         {roles.map((role) => {
-                          const RoleIcon = getIcon(role.icon)
+                          const RoleIcon = getTablerIcon(role.icon)
                           return (
                             <Select.Item
                               key={role.id}
