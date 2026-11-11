@@ -50,7 +50,6 @@ type TransactionRole = {
 }
 
 const ADD_CATEGORY_VALUE = "__add-category__"
-const ADD_ROLE_VALUE = "__add-role__"
 
 const CATEGORY_ICON_MAP = {
   IconBriefcase,
@@ -99,19 +98,14 @@ export default function CreateTransactionContent({
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [isLoadingRoles, setIsLoadingRoles] = useState(true)
   const [isCategoryPopoverOpen, setIsCategoryPopoverOpen] = useState(false)
-  const [isRolePopoverOpen, setIsRolePopoverOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
-  const [newRoleName, setNewRoleName] = useState("")
   const [newCategoryIcon, setNewCategoryIcon] =
     useState<CategoryIconName>("IconTag")
-  const [newRoleIcon, setNewRoleIcon] = useState<CategoryIconName>("IconTag")
   const [isCreatingCategory, setIsCreatingCategory] = useState(false)
-  const [isCreatingRole, setIsCreatingRole] = useState(false)
   const [isSavingTransaction, setIsSavingTransaction] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const amountInputRef = useRef<HTMLInputElement>(null)
   const categorySelectTriggerRef = useRef<HTMLButtonElement>(null)
-  const roleSelectTriggerRef = useRef<HTMLButtonElement>(null)
   const formattedAmount = formatCurrencyAmount(amountDigits, currency)
   const selectedCategory = categories.find(
     (category) => category.id === selectedCategoryId
@@ -176,32 +170,6 @@ export default function CreateTransactionContent({
       setError("Não foi possível criar a categoria.")
     } finally {
       setIsCreatingCategory(false)
-    }
-  }
-
-  async function createRole() {
-    const name = newRoleName.trim()
-    if (!name) {
-      setError("Informe o nome do setor.")
-      return
-    }
-
-    setError(null)
-    setIsCreatingRole(true)
-    try {
-      const response = await axiosClient.post<TransactionRole>("/role/create", {
-        name,
-        icon: newRoleIcon,
-      })
-      const role = response.data
-      setRoles((current) => [...current, role])
-      setSelectedRoleId(role.id)
-      setNewRoleName("")
-      setIsRolePopoverOpen(false)
-    } catch {
-      setError("Não foi possível criar o setor.")
-    } finally {
-      setIsCreatingRole(false)
     }
   }
 
@@ -524,17 +492,11 @@ export default function CreateTransactionContent({
               <Select.Root
                 value={selectedRoleId}
                 onValueChange={(value) => {
-                  if (value === ADD_ROLE_VALUE) {
-                    setIsRolePopoverOpen(true)
-                    setError(null)
-                    return
-                  }
                   setSelectedRoleId(value)
                   setError(null)
                 }}
               >
                 <Select.Trigger
-                  ref={roleSelectTriggerRef}
                   id="transaction-role"
                   className="flex h-8 w-full items-center justify-between gap-2 rounded-md border border-input bg-input/20 px-2 text-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
                 >
@@ -564,17 +526,6 @@ export default function CreateTransactionContent({
                   >
                     <Select.Popup className="min-w-48 rounded-md border bg-popover p-2 text-popover-foreground shadow-md">
                       <Select.List>
-                        <Select.Item
-                          value={ADD_ROLE_VALUE}
-                          className="flex min-h-8 cursor-default items-center rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-                        >
-                          <Select.ItemText>
-                            <span className="flex items-center gap-2">
-                              <IconPlus className="size-3.5" />
-                              Adicionar setor
-                            </span>
-                          </Select.ItemText>
-                        </Select.Item>
                         {roles.map((role) => {
                           const RoleIcon = getIcon(role.icon)
                           return (
@@ -602,92 +553,6 @@ export default function CreateTransactionContent({
                   </Select.Positioner>
                 </Select.Portal>
               </Select.Root>
-              <Popover
-                open={isRolePopoverOpen}
-                onOpenChange={setIsRolePopoverOpen}
-              >
-                <PopoverContent
-                  anchor={roleSelectTriggerRef}
-                  align="start"
-                  className="w-80"
-                >
-                  <PopoverTitle>Novo setor</PopoverTitle>
-                  <ButtonGroup
-                    aria-label="Ícone e nome do setor"
-                    className="w-full"
-                  >
-                    <Select.Root
-                      value={newRoleIcon}
-                      onValueChange={(value) => {
-                        if (value) {
-                          setNewRoleIcon(value as CategoryIconName)
-                        }
-                      }}
-                    >
-                      <Select.Trigger
-                        aria-label="Ícone do setor"
-                        className="flex h-7 w-12 shrink-0 items-center justify-center gap-1 rounded-md border border-input bg-input/20 px-2 outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
-                      >
-                        {(() => {
-                          const SelectedIcon = getIcon(newRoleIcon)
-                          return <SelectedIcon className="size-4" />
-                        })()}
-                        <Select.Icon>
-                          <IconChevronDown className="size-3" />
-                        </Select.Icon>
-                      </Select.Trigger>
-                      <Select.Portal>
-                        <Select.Positioner
-                          sideOffset={4}
-                          className="z-[60] outline-none"
-                        >
-                          <Select.Popup className="max-h-56 min-w-40 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-                            <Select.List>
-                              {CATEGORY_ICON_OPTIONS.map((option) => {
-                                const OptionIcon = getIcon(option.name)
-                                return (
-                                  <Select.Item
-                                    key={option.name}
-                                    value={option.name}
-                                    className="flex min-h-7 cursor-default items-center gap-2 rounded-sm px-2 py-1 text-xs outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-                                  >
-                                    <OptionIcon className="size-4" />
-                                    <Select.ItemText>
-                                      {option.label}
-                                    </Select.ItemText>
-                                  </Select.Item>
-                                )
-                              })}
-                            </Select.List>
-                          </Select.Popup>
-                        </Select.Positioner>
-                      </Select.Portal>
-                    </Select.Root>
-                    <Input
-                      autoFocus
-                      aria-label="Nome do setor"
-                      placeholder="Nome do setor"
-                      value={newRoleName}
-                      onChange={(event) => setNewRoleName(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault()
-                          void createRole()
-                        }
-                      }}
-                    />
-                  </ButtonGroup>
-                  <Button
-                    type="button"
-                    className="w-full"
-                    disabled={isCreatingRole}
-                    onClick={() => void createRole()}
-                  >
-                    <IconPlus />
-                    {isCreatingRole ? "Criando..." : "Criar setor"}
-                  </Button>
-                </PopoverContent>
-              </Popover>
             </div>
           </FieldSet>
           {error && (
