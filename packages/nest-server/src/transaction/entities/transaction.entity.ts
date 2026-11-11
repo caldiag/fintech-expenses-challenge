@@ -1,8 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Currency } from '@app/types';
 import type { Relation } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { RoleEntity } from '../../permissions/entities/role.entity.ts';
 import { BaseEntity } from '../../typeorm/entities/base-entity.ts';
 import { UserEntity } from '../../user/entities/user.entity.ts';
-import { Currency } from '@app/types';
 import { TransactionCategoryEntity } from './transaction-category.entity.ts';
 
 @Entity()
@@ -25,8 +26,12 @@ export class TransactionEntity extends BaseEntity {
   @ManyToOne(
     () => TransactionCategoryEntity,
     (category) => category.transactions,
+    { nullable: false },
   )
   transactionCategory: Relation<TransactionCategoryEntity>;
+
+  @ManyToOne(() => RoleEntity, (role) => role.transactions, { nullable: false })
+  role: Relation<RoleEntity>;
 
   @ManyToOne(() => UserEntity, (user) => user.transactions)
   createdBy: Relation<UserEntity>;
