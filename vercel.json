@@ -4,6 +4,8 @@
     "nest-server": {
       "root": "packages/nest-server",
       "framework": "nestjs",
+      "entrypoint": "src/main.ts",
+      "outputDirectory": ".",
       "installCommand": "npx --yes pnpm@12.18.0 install --frozen-lockfile",
       "buildCommand": "npx --yes pnpm@12.18.0 --filter @app/nest-server build"
     },
@@ -16,6 +18,7 @@
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": { "service": "nest-server" } },
+    { "source": "/", "destination": { "service": "react-client", "path": "/index.html" } },
     { "source": "/:path*", "destination": { "service": "react-client" } }
   ]
 }
