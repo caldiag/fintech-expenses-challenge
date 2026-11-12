@@ -5,7 +5,7 @@ As transações podem ser de entrada ou de saída, e podem ser filtradas por div
 
 O sistema foi construído em NestJS e Node, em um monorepo que inclui um front-end em React com React Router V7. Ambos possuem deploy em sistema único no vercel:
 
-[Acessar demo](https://fintech-expenses-challenge-i8lmgdldt-calebs-projects-98fa8f7b.vercel.app/)
+[Acessar demo](https://fintech-expenses-challenge-three.vercel.app/)
 
 <img src="assets/image.png" alt="Image 0" width="500">
 <img src="assets/image1.png" alt="Image 1" width="500">
