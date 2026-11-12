@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "nest-server": {
+      "root": "packages/nest-server",
+      "framework": "nestjs"
+    },
+    "react-client": {
+      "root": "packages/react-client",
+      "framework": "react-router"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": { "service": "nest-server" } },
+    { "source": "/:path*", "destination": { "service": "react-client" } }
+  ]
+}
