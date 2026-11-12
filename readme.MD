@@ -45,6 +45,7 @@ Você precisará do `postgreSQL` instalado na sua máquina, assim como o `pnpm` 
 - Alguns componentes do front-end não me satisfazem em "enxutez". Poderiam ser simplificados, dado mais tempo.
 - Os filtros funcionam, porém a implementação é pouco geral. Não é possível compor filtros do mesmo tipo (transações de empresa x e transações de empresa y), por exemplo. O back-end possui o suporte para ordenar campos, mas essa funcionalidade ainda não foi mapeada no front-end.
 - O servidor e front-end estão hospedados em uma conta Vercel gratuita, e o banco de dados está em uma instância gratuita da Neon. Portanto, a performance da demo online é insatisfatória.
+- A função de pesquisa no front-end não foi implementada a tempo.
 
 ### Uso de IA
 - O Copilot foi usado pontualmente no desenvolvimento do projeto, principalmente em tarefas demoradas e de pouco retorno, como montagem de formulários e consulta de documentação. Não foi utilizada na tomada de decisões do projeto, pois na minha experiência pessoal tenho resultados insatisfatórios com os modelos modernos nesse âmbito. Alguns controllers e serviços foram programados pelo Copilot, usando como referência controllers que montei à mão e servem funcionalidade semelhante.
