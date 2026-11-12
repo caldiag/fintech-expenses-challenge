@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadEnvFile } from 'node:process';
+import pg from 'pg';
 import { DataSource } from 'typeorm';
 import { CompanyEntity } from '../company/entities/company.entity.ts';
 import { ContactEntity } from '../contact/entities/contact.entity.ts';
@@ -17,6 +18,7 @@ if (existsSync(envPath)) {
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
+  driver: pg,
   host: process.env.DATABASE_HOST,
   port: parseInt(process.env.DATABASE_PORT || '5432', 10),
   username: process.env.DATABASE_USERNAME,
