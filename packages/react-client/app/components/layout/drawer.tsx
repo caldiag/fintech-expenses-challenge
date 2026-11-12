@@ -33,7 +33,7 @@ export default function Drawer() {
           onClick={() => navigate(AppRoutes.Summary)}
           className={
             buttonStyling +
-            (pathname === AppRoutes.Dashboard
+            (pathname === AppRoutes.Summary
               ? " bg-sidebar-border opacity-100"
               : "")
           }

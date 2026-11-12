@@ -42,6 +42,7 @@ export default function Transactions() {
   const navigate = useNavigate()
   const { id: transactionId } = useParams()
   const [tableData, setTableData] = useState<TransactionTableRow[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [sortDirection, setSortDirection] = useState<SortDirection>(
@@ -55,6 +56,8 @@ export default function Transactions() {
   const { refreshKey, refreshView } = useDashboardRefresh()
 
   useEffect(() => {
+    let active = true
+    setIsLoading(true)
     const params: Record<string, string | number> = { page: currentPage }
     filters.forEach((filter) => {
       if (filter.key === "createdAt") {
@@ -80,6 +83,13 @@ export default function Transactions() {
         setTableData(d.data.transactions.map(parseTableData))
         setTotalPages(d.data.totalPages)
       })
+      .finally(() => {
+        if (active) setIsLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
   }, [currentPage, filters, refreshKey])
 
   useEffect(() => {
@@ -160,6 +170,7 @@ export default function Transactions() {
     <div className="w-fill">
       <RecordTable
         data={tableData}
+        isLoading={isLoading}
         onRowClick={(item) => navigate(`${AppRoutes.Transactions}/${item.id}`)}
         columnKeys={[
           {

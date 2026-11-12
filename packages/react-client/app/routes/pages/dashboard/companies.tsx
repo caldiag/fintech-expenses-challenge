@@ -36,6 +36,7 @@ export default function Companies() {
   const navigate = useNavigate()
   const { id: companyId } = useParams()
   const [tableData, setTableData] = useState<CompanyTableRow[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [sortDirection, setSortDirection] = useState<SortDirection>(
@@ -46,6 +47,8 @@ export default function Companies() {
   const { refreshKey, refreshView } = useDashboardRefresh()
 
   useEffect(() => {
+    let active = true
+    setIsLoading(true)
     const params: Record<string, string | number> = { page: currentPage }
     filters.forEach((filter) => {
       if (filter.key === "createdAt") {
@@ -70,12 +73,20 @@ export default function Companies() {
         )
         setTotalPages(data.totalPages)
       })
+      .finally(() => {
+        if (active) setIsLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
   }, [currentPage, filters, refreshKey])
 
   return (
     <div className="w-fill">
       <RecordTable
         data={tableData}
+        isLoading={isLoading}
         onRowClick={(item) => navigate(`${AppRoutes.Companies}/${item.id}`)}
         columnKeys={[
           {

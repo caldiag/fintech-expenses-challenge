@@ -22,6 +22,7 @@ import type {
 } from "./record-table-filters"
 import RecordTableFilters from "./record-table-filters"
 import RecordTablePagination from "./record-table-pagination"
+import { Spinner } from "../ui/spinner"
 export type {
   RecordTableFilter,
   RecordTableFilterDefinition,
@@ -44,6 +45,7 @@ type RecordTableProps<TItem extends { id: string }> = {
   filterableColumnKeys?: RecordTableFilterDefinition[]
   onFiltersChange?: (filters: RecordTableFilter[]) => void
   onRowClick?: (item: TItem) => void
+  isLoading?: boolean
 }
 
 export default function RecordTable<TItem extends { id: string }>({
@@ -58,6 +60,7 @@ export default function RecordTable<TItem extends { id: string }>({
   filterableColumnKeys = [],
   onFiltersChange,
   onRowClick,
+  isLoading = false,
 }: RecordTableProps<TItem>) {
   return (
     <div>
@@ -101,48 +104,62 @@ export default function RecordTable<TItem extends { id: string }>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row, i) => {
-              return (
-                <TableRow
-                  key={row.id ?? i}
-                  tabIndex={onRowClick ? 0 : undefined}
-                  aria-label={onRowClick ? `Abrir ${tableCaption}` : undefined}
-                  className={
-                    onRowClick ? "cursor-pointer hover:bg-muted/50" : undefined
-                  }
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  onKeyDown={
-                    onRowClick
-                      ? (event) => {
-                          if (
-                            event.target === event.currentTarget &&
-                            (event.key === "Enter" || event.key === " ")
-                          ) {
-                            event.preventDefault()
-                            onRowClick(row)
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columnKeys.length}>
+                  <div className="flex min-h-32 items-center justify-center">
+                    <Spinner className="size-6" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((row, i) => {
+                return (
+                  <TableRow
+                    key={row.id ?? i}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    aria-label={
+                      onRowClick ? `Abrir ${tableCaption}` : undefined
+                    }
+                    className={
+                      onRowClick
+                        ? "cursor-pointer hover:bg-muted/50"
+                        : undefined
+                    }
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    onKeyDown={
+                      onRowClick
+                        ? (event) => {
+                            if (
+                              event.target === event.currentTarget &&
+                              (event.key === "Enter" || event.key === " ")
+                            ) {
+                              event.preventDefault()
+                              onRowClick(row)
+                            }
                           }
-                        }
-                      : undefined
-                  }
-                >
-                  {columnKeys.map((columnKey) => (
-                    <TableCell className="border-r-1" key={columnKey.key}>
-                      {!columnKey.customComponent &&
-                        (data[i][columnKey.key] as ReactNode)}
-                      {columnKey.customComponent && (
-                        <>
-                          {columnKey.customComponent(
-                            data[i][columnKey.key] as ReactNode,
-                            data[i]
-                          )}
-                        </>
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              )
-            })}
-            {!data.length && (
+                        : undefined
+                    }
+                  >
+                    {columnKeys.map((columnKey) => (
+                      <TableCell className="border-r-1" key={columnKey.key}>
+                        {!columnKey.customComponent &&
+                          (data[i][columnKey.key] as ReactNode)}
+                        {columnKey.customComponent && (
+                          <>
+                            {columnKey.customComponent(
+                              data[i][columnKey.key] as ReactNode,
+                              data[i]
+                            )}
+                          </>
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })
+            )}
+            {!isLoading && !data.length && (
               <TableRow>
                 <TableCell colSpan={columnKeys.length} className="text-center">
                   <Empty>
