@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 
+console.log('Nest startup: loading application modules');
 const [
   { ValidationPipe },
   { NestFactory },
@@ -13,6 +14,7 @@ const [
 ]);
 
 async function bootstrap() {
+  console.log('Nest startup: initializing application and database');
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
@@ -30,5 +32,11 @@ async function bootstrap() {
     credentials: true,
   });
   await app.listen(process.env.PORT ?? 3000);
+  console.log('Nest startup: application listening');
 }
-await bootstrap();
+try {
+  await bootstrap();
+} catch (error) {
+  console.error('Nest startup failed:', error);
+  throw error;
+}

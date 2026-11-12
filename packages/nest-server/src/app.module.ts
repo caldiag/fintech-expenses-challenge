@@ -19,7 +19,11 @@ import { DashboardModule } from './dashboard/dashboard.module.js';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(AppDataSource.options),
+    TypeOrmModule.forRoot({
+      ...AppDataSource.options,
+      retryAttempts: 2,
+      retryDelay: 1000,
+    }),
     AuthModule,
     TransactionModule,
     UserModule,
