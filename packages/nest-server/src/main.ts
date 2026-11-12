@@ -1,21 +1,21 @@
 import 'reflect-metadata';
 
-console.log('Nest startup: loading application modules');
-const [
-  { ValidationPipe },
-  { NestFactory },
-  { default: cookieParser },
-  { AppModule },
-] = await Promise.all([
-  import('@nestjs/common/pipes/index.js'),
-  import('@nestjs/core'),
-  import('cookie-parser'),
-  import('./app.module.ts'),
-]);
-
 async function bootstrap() {
+  console.log('Nest startup: loading application modules');
+  const [
+    { ValidationPipe },
+    { NestFactory },
+    { default: cookieParser },
+    { AppModule },
+  ] = await Promise.all([
+    import('@nestjs/common/pipes/index.js'),
+    import('@nestjs/core'),
+    import('cookie-parser'),
+    import('./app.module.ts'),
+  ]);
+
   console.log('Nest startup: initializing application and database');
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { abortOnError: false });
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
@@ -34,9 +34,7 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
   console.log('Nest startup: application listening');
 }
-try {
-  await bootstrap();
-} catch (error) {
+void bootstrap().catch((error: unknown) => {
   console.error('Nest startup failed:', error);
-  throw error;
-}
+  process.exitCode = 1;
+});
