@@ -7,10 +7,10 @@ O sistema foi construído em NestJS e Node, em um monorepo que inclui um front-e
 
 [Acessar demo](https://fintech-expenses-challenge-i8lmgdldt-calebs-projects-98fa8f7b.vercel.app/)
 
-![Image 0](assets/image.png | width=200)
-![Image 1](assets/image1.png | width=200)
-![Image 2](assets/image2.png | width=200)
-![Image 3](assets/image3.png | width=200)
+<img src="assets/image.png" alt="Image 0" width="200">
+<img src="assets/image1.png" alt="Image 1" width="200">
+<img src="assets/image2.png" alt="Image 2" width="200">
+<img src="assets/image3.png" alt="Image 3" width="200">
 
 O usuário padrão de administrador e a senha são, respectivamente, admin@admin.com e `&_Lo;0,J72GVh`.
 
