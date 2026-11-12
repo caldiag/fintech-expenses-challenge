@@ -63,8 +63,8 @@ export default function RecordTable<TItem extends { id: string }>({
   isLoading = false,
 }: RecordTableProps<TItem>) {
   return (
-    <div>
-      <div className="mb-2 flex w-full items-center justify-between gap-1">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="mb-2 flex w-full shrink-0 items-center justify-between gap-1">
         <div className="flex w-full items-center gap-1">
           <ButtonGroup>
             {filterableColumnKeys.length > 0 && (
@@ -86,14 +86,17 @@ export default function RecordTable<TItem extends { id: string }>({
           />
         )}
       </div>
-      <div className="overflow-hidden border-b-1">
-        <Table>
+      <div className="min-h-0 flex-1 border-b-1">
+        <Table containerClassName="h-full min-h-0 overflow-auto">
           <TableHeader>
-            <TableRow>
+            <TableRow className="border-b-1">
               {columnKeys.map((columnKey) => {
                 const Icon = columnKey.icon
                 return (
-                  <TableHead className="border-r-1" key={columnKey.key}>
+                  <TableHead
+                    className="sticky top-0 z-10 border-r-1 bg-background"
+                    key={columnKey.key}
+                  >
                     <div className="flex items-center gap-1">
                       {<Icon size={12} />}
                       {columnKey.label}

@@ -17,7 +17,7 @@ export default function Drawer() {
   const navigate = useNavigate()
 
   return (
-    <Card className="z-2 h-screen max-w-65 rounded-none bg-sidebar">
+    <Card className="z-2 h-screen max-w-65 shrink-0 rounded-none bg-sidebar">
       <CardHeader>
         <CardTitle>
           <Title

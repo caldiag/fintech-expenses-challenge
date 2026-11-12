@@ -21,7 +21,7 @@ export default function NavigationBar() {
   const { refreshView } = useDashboardRefresh()
 
   return (
-    <div className="w-fill sticky top-0 z-1 mb-4 flex h-10 items-center justify-between gap-1 border-b-1 p-3 px-4">
+    <div className="w-fill sticky top-0 z-1 mb-4 flex h-10 items-center justify-between gap-1 border-b-1 bg-background p-3 px-4">
       <div>
         <Title title={getNavbarTitle(pathname as AppRoutes)} />
       </div>
