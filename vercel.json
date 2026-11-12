@@ -3,11 +3,15 @@
   "services": {
     "nest-server": {
       "root": "packages/nest-server",
-      "framework": "nestjs"
+      "framework": "nestjs",
+      "installCommand": "npx --yes pnpm@12.18.0 install --frozen-lockfile",
+      "buildCommand": "npx --yes pnpm@12.18.0 --filter @app/nest-server build"
     },
     "react-client": {
       "root": "packages/react-client",
-      "framework": "react-router"
+      "framework": "react-router",
+      "installCommand": "npx --yes pnpm@12.18.0 install --frozen-lockfile",
+      "buildCommand": "npx --yes pnpm@12.18.0 --filter @app/react-client build"
     }
   },
   "rewrites": [
