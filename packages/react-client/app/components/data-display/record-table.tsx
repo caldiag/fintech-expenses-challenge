@@ -8,6 +8,7 @@ import type { ReactNode } from "react"
 import { Button } from "../ui/button"
 import { ButtonGroup } from "../ui/button-group"
 import { Empty, EmptyDescription, EmptyMedia, EmptyTitle } from "../ui/empty"
+import { Spinner } from "../ui/spinner"
 import {
   Table,
   TableBody,
@@ -22,7 +23,6 @@ import type {
 } from "./record-table-filters"
 import RecordTableFilters from "./record-table-filters"
 import RecordTablePagination from "./record-table-pagination"
-import { Spinner } from "../ui/spinner"
 export type {
   RecordTableFilter,
   RecordTableFilterDefinition,
