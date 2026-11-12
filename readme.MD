@@ -47,6 +47,7 @@ Você precisará do `postgreSQL` instalado na sua máquina, assim como o `pnpm` 
 - O servidor e front-end estão hospedados em uma conta Vercel gratuita, e o banco de dados está em uma instância gratuita da Neon. Portanto, a performance da demo online é insatisfatória.
 - A função de pesquisa no front-end não foi implementada a tempo.
 - O plano inicial era que o botão de perfil levasse a uma página de configurações, onde seriam permitidos acessos à novos usuários, configuração de usuários registrados e categorias de transação. Porém, não houve tempo de ser implementado. Por isso, novos usuários registrados precisam ter um setor (`role`) associado manualmente no banco de dados, ou o acesso deve ser realizado pelo perfil de admin.
+- É possível adicionar categorias novas e editar a categoria de transações já feitas, porém ainda não é possível editar categorias de transações ou deletá-las no front-end.
 
 ### Uso de IA
 - O Copilot foi usado pontualmente no desenvolvimento do projeto, principalmente em tarefas demoradas e de pouco retorno, como montagem de formulários e consulta de documentação. Não foi utilizada na tomada de decisões do projeto, pois na minha experiência pessoal tenho resultados insatisfatórios com os modelos modernos nesse âmbito. Alguns controllers e serviços foram programados pelo Copilot, usando como referência controllers que montei à mão e servem funcionalidade semelhante.
